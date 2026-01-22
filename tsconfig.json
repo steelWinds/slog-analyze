@@ -12,6 +12,10 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+    },
 
     /* Linting */
     "strict": true,
@@ -21,5 +25,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "bin"]
+  "include": ["src", "bin", "vite-env.d.ts"]
 }
