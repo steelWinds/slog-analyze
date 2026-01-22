@@ -1,12 +1,19 @@
-import { Command } from 'commander'
+import { Command } from '@commander-js/extra-typings'
+import { analyze, analyzeConfig } from '@/cli/commands/analyze/index.ts'
 
 export function run() {
-  const commander = new Command()
+  const program = new Command()
 
-  commander
+  program
     .name(import.meta.env.VITE_APP_NAME)
     .description(import.meta.env.VITE_APP_DESCRIPTION)
     .version(import.meta.env.VITE_APP_VERSION)
 
-  commander.parse()
+  program
+    .command(analyzeConfig.name)
+    .description(analyzeConfig.description)
+    .arguments(analyzeConfig.arguments)
+    .action((path) => analyze(path))
+
+  program.parse()
 }

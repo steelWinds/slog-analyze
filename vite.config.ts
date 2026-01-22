@@ -27,6 +27,7 @@ export default defineConfig({
         'os',
         'process',
         'commander',
+        '@commander-js/extra-typings',
         'chalk',
         'ora',
         'consola'
