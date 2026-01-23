@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest'
-import { Logger } from '@/utils/logger.ts'
+import { Logger } from '@/utils/logger/index.ts'
 import { consola } from 'consola';
 import { faker } from '@faker-js/faker/locale/en';
 
