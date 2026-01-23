@@ -1,31 +1,37 @@
 import { pipeline } from 'node:stream/promises'
-import { createReadStream, createWriteStream, type ReadStreamOptions, type WriteStreamOptions } from 'node:fs'
-import type { AsyncTransformGenerator, TransformFunction } from '@/services/types.ts'
-
-type TransformFileStreamOptions = { read?: ReadStreamOptions, write?: WriteStreamOptions }
-type TransformTextStreamOptions = TransformFileStreamOptions & { encoding?: BufferEncoding }
+import { createReadStream, createWriteStream, ReadStream } from 'node:fs'
+import type { AsyncTransformGenerator, TransformFileStreamOptions, TransformFunction, TransformTextStreamOptions } from '@/services/types.ts'
 
 export class FileStreamService {
   async #transformFileStream(from: string, transform: AsyncTransformGenerator, to: string, options?: TransformFileStreamOptions) {
-    await pipeline(
-      createReadStream(from, options?.read),
-      async function* (source) {
-        yield* transform(source)
-      },
-      createWriteStream(to, options?.write)
-    )
+    try {
+      await pipeline(
+        createReadStream(from, options?.read),
+        async function* (source: ReadStream) { yield* transform(source) },
+        createWriteStream(to, options?.write)
+      )
+    } catch(err) {
+      if (options?.onError) {
+        options?.onError(err)
+      } else {
+        throw err
+      }
+    }
   }
 
-  async transformTextStream(from: string, transform: TransformFunction<string, string>, to: string, options?: TransformTextStreamOptions) {
-    const { encoding = 'utf-8', ...fileStreamOptions } = options ?? {}
+  async transformTextStream(from: string, transform: TransformFunction<Buffer, Buffer | string>, to: string, options?: TransformTextStreamOptions) {
+    const { encoding = 'utf-8', onTransformError, ...fileStreamOptions } = options ?? {}
 
     return this.#transformFileStream(
       from,
       async function* (source) {
-        source.setEncoding(encoding)
-
         for await (const chunk of source) {
-          yield transform(chunk as string)
+          try {
+            yield await transform(chunk)
+          } catch(err) {
+            if (onTransformError) onTransformError(chunk, err)
+            else throw err
+          }
         }
       },
       to,

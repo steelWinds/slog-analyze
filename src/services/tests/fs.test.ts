@@ -52,3 +52,63 @@ test('Test transform file stream', async () => {
 
   expect(text).toBe(msg)
 })
+
+test('Test error suppression in transform callback', async () => {
+  const msg = faker.lorem.text()
+  const pathInputFile = format({
+    root: '/',
+    base: faker.system.commonFileName('txt')
+  })
+  const pathOutputFile = format({
+    root: '/',
+    base: faker.system.commonFileName('txt')
+  })
+
+  fs.writeFileSync(pathInputFile, msg)
+
+  const fsService = new FileStreamService()
+
+  const err = new Error('Transform error')
+  const transformCallback = vi.fn(() => {
+    throw err
+  })
+  const onTransformError = vi.fn()
+
+  await fsService.transformTextStream(
+    pathInputFile,
+    transformCallback,
+    pathOutputFile,
+    { onTransformError }
+  )
+
+  expect(onTransformError.mock.calls[0][1]).toBeInstanceOf(Error)
+  expect(onTransformError.mock.calls[0][1].message).toBe('Transform error')
+})
+
+test('Test error thrown in transform callback', async () => {
+  const msg = faker.lorem.text()
+
+  const pathInputFile = format({
+    root: '/',
+    base: faker.system.commonFileName('txt')
+  })
+  const pathOutputFile = format({
+    root: '/',
+    base: faker.system.commonFileName('txt')
+  })
+
+  fs.writeFileSync(pathInputFile, msg)
+
+  const fsService = new FileStreamService()
+  const transformCallback = vi.fn(() => {
+    throw new Error('Transform error')
+  })
+
+  await expect(
+    fsService.transformTextStream(
+      pathInputFile,
+      transformCallback,
+      pathOutputFile,
+    )
+  ).rejects.toThrow('Transform error')
+})
