@@ -1,6 +1,6 @@
 import { pipeline } from 'node:stream/promises'
 import { createReadStream, createWriteStream, ReadStream } from 'node:fs'
-import type { AsyncTransformGenerator, TransformFileStreamOptions, TransformFunction, TransformTextStreamOptions } from '@/services/types.ts'
+import type { AsyncTransformGenerator, TransformFileStreamOptions, TransformFunction, TransformTextStreamOptions } from '@/services/fs/types.ts'
 
 export class FileStreamService {
   async #transformFileStream(from: string, transform: AsyncTransformGenerator, to: string, options?: TransformFileStreamOptions) {

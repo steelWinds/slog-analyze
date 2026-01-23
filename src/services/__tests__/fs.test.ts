@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker/locale/en';
 import { beforeEach, expect, test, vi } from 'vitest'
 import { fs, vol } from 'memfs'
 import { format } from 'path';
-import { FileStreamService } from '@/services/fs.ts';
+import { FileStreamService } from '@/services/fs/index.ts';
 
 vi.mock('node:fs')
 vi.mock('node:fs/promises')
