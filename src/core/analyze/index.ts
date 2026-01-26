@@ -1,3 +1,1 @@
-export function analyzeLog () {
-  
-}
+export class AnalyzeCore {}

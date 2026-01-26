@@ -3,8 +3,6 @@ import { Logger } from '@/utils/logger/index.ts'
 import { consola } from 'consola';
 import { faker } from '@faker-js/faker/locale/en';
 
-vi.mock(import('consola'))
-
 test('Prompt output', async () => {
   const msg = faker.lorem.words(1)
 

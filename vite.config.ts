@@ -1,7 +1,11 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
+  test: {
+    setupFiles: ['./vitest.setup.ts']
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
