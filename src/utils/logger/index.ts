@@ -28,7 +28,7 @@ export class Logger {
 }
 
 export function log(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
-  if (import.meta.env.PROD) return;
+  if (import.meta.env.TSDOWN_MODE === 'production') return;
 
   const originalMethod = descriptor.value;
 

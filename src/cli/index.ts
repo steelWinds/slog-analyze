@@ -5,9 +5,9 @@ export function run() {
   const program = new Command()
 
   program
-    .name(import.meta.env.VITE_APP_NAME)
-    .description(import.meta.env.VITE_APP_DESCRIPTION)
-    .version(import.meta.env.VITE_APP_VERSION)
+    .name(import.meta.env.TSDOWN_APP_NAME)
+    .description(import.meta.env.TSDOWN_APP_DESCRIPTION)
+    .version(import.meta.env.TSDOWN_APP_VERSION)
 
   program
     .command(analyzeConfig.name)
