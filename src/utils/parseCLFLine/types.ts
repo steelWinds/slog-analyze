@@ -13,5 +13,3 @@ export interface ParsedCLF {
 	referrer?: string;
 	userAgent?: string;
 }
-
-export type Return = ParsedCLF | null;

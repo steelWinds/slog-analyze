@@ -3,13 +3,9 @@ import {
 	FORMATS,
 	START_WITHOUT_INSTANCE_STRING,
 } from '@/utils/parseCLFLine/constants.ts';
-import type {
-	FormatCLF,
-	ParsedCLF,
-	Return,
-} from '@/utils/parseCLFLine/types.ts';
+import type { FormatCLF, ParsedCLF } from '@/utils/parseCLFLine/types.ts';
 
-export const parseCLFLine = (line: string): Return => {
+export const parseCLFLine = (line: string): ParsedCLF | null => {
 	let matchesExec: RegExpExecArray | null = null;
 	let formatName: FormatCLF | null = null;
 

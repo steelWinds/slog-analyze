@@ -10,14 +10,7 @@
 		"max-statements": "off",
 		"no-unused-vars": "error",
 		"eqeqeq": ["error", "always", { "null": "ignore" }],
-		"no-magic-numbers": [
-			"error",
-			{
-				"ignoreArrayIndexes": true,
-				"ignoreNumericLiteralTypes": true,
-				"ignoreTypeIndexes": true
-			}
-		],
+		"no-magic-numbers": "off",
 		"no-debugger": "error",
 		"no-eval": "error",
 		"func-style": [

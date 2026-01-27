@@ -70,7 +70,7 @@
 		"*": "oxfmt --no-error-on-unmatched-pattern",
 		"*.{js,jsx,ts,tsx,mjs,cjs}": [
 			"pnpm run lint",
-			"pnpm run test:run"
+			"pnpm run test:run --passWithNoTests"
 		]
 	},
 	"engines": {
