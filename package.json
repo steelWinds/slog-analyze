@@ -2,6 +2,7 @@
 	"name": "slog-analyze",
 	"version": "0.0.1",
 	"private": true,
+	"description": "Miniature log analyzer, just for fun",
 	"keywords": [
 		"analyzer",
 		"cli",
@@ -13,12 +14,21 @@
 		"type": "git",
 		"url": "https://github.com/steelWinds/slog-analyze"
 	},
+	"bin": {
+		"slog-analyze": "./build/slog-analyze.mjs"
+	},
+	"files": [
+		"build",
+		"README.md",
+		"LICENSE"
+	],
 	"os": [
 		"darwin",
 		"linux",
 		"win32"
 	],
 	"type": "module",
+	"main": "./build/slog-analyze.mjs",
 	"scripts": {
 		"build": "tsdown --env-file .env.production --minify --log-level error",
 		"build:dev": "tsdown --env-file .env.development --sourcemap",
@@ -33,13 +43,13 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@commander-js/extra-typings": "^14.0.0",
 		"chalk": "^5.6.2",
 		"commander": "^14.0.2",
 		"consola": "^3.4.2",
 		"ora": "^9.0.0"
 	},
 	"devDependencies": {
+		"@commander-js/extra-typings": "^14.0.0",
 		"@faker-js/faker": "^10.2.0",
 		"@types/node": "^25.0.9",
 		"@vitest/coverage-v8": "^4.0.17",
