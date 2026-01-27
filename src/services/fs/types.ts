@@ -16,7 +16,7 @@ export interface TransformFileStreamOptions {
 
 export interface TransformTextStreamOptions extends TransformFileStreamOptions {
 	encoding?: BufferEncoding;
-	onTransformError?: (chunk: Buffer, err: unknown) => void;
+	onTransformError?: (chunk: string, err: unknown) => void;
 }
 
 export interface TransformFileStreamParams<TTransform, TOptions> {
