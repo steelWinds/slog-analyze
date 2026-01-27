@@ -28,7 +28,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "oxlint",
+    "lint": "oxlint --type-aware",
     "lint:fix": "oxlint --fix",
     "lint-staged": "lint-staged",
     "prepare": "husky"
@@ -41,6 +41,7 @@
     "lint-staged": "^16.2.7",
     "memfs": "^4.56.9",
     "oxlint": "^1.42.0",
+    "oxlint-tsgolint": "^0.11.2",
     "tsdown": "0.20.1",
     "typescript": "~5.9.3",
     "vitest": "^4.0.17"
@@ -56,6 +57,9 @@
     "tsdown": "0.20.1"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs}": ["pnpm run lint", "pnpm run test:run"]
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "pnpm run lint",
+      "pnpm run test:run"
+    ]
   }
 }

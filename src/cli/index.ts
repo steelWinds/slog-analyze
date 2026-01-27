@@ -1,7 +1,7 @@
-import { Command } from '@commander-js/extra-typings'
 import { analyze, analyzeConfig } from '@/cli/commands/analyze/index.ts'
+import { Command } from '@commander-js/extra-typings'
 
-export function run() {
+export const run = () => {
   const program = new Command()
 
   program
@@ -13,7 +13,7 @@ export function run() {
     .command(analyzeConfig.name)
     .description(analyzeConfig.description)
     .arguments(analyzeConfig.arguments)
-    .action((path) => analyze(path))
+    .action((path) => { analyze(path) })
 
   program.parse()
 }

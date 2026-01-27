@@ -1,3 +1,1 @@
-export function analyze(path: string) {
-  console.log('analyze... ' + path)
-}
+export const analyze = (path: string) => path

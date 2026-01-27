@@ -1,15 +1,23 @@
-import { pipeline } from 'node:stream/promises'
-import { createReadStream, createWriteStream, ReadStream } from 'node:fs'
+import type {
+  AsyncTransformGenerator,
+  TransformFileStreamOptions,
+  TransformFileStreamParams,
+  TransformFunction,
+  TransformTextStreamOptions
+} from '@/services/fs/types.ts'
+import { ReadStream, createReadStream, createWriteStream } from 'node:fs'
 import { log } from '@/utils/logger/index.ts'
-import type { AsyncTransformGenerator, TransformFileStreamOptions, TransformFunction, TransformTextStreamOptions } from '@/services/fs/types.ts'
+import { pipeline } from 'node:stream/promises'
 
 export class FileStreamService {
   @log
-  private async _transformFileStream(from: string, transform: AsyncTransformGenerator, to: string, options?: TransformFileStreamOptions) {
+  private async _transformFileStream(params: TransformFileStreamParams<AsyncTransformGenerator, TransformFileStreamOptions>) {
+    const { from, to, transform, options } = params
+
     try {
       await pipeline(
         createReadStream(from, options?.read),
-        async function* (source: ReadStream) { yield* transform(source) },
+        async function* _transform(source: ReadStream) { yield* transform(source) },
         createWriteStream(to, options?.write)
       )
     } catch(err) {
@@ -22,23 +30,27 @@ export class FileStreamService {
   }
 
   @log
-  async transformTextStream(from: string, transform: TransformFunction<Buffer, Buffer | string>, to: string, options?: TransformTextStreamOptions) {
+  async transformTextStream(params: TransformFileStreamParams<TransformFunction<string, string>, TransformTextStreamOptions>) {
+    const { from, to, transform, options } = params
+
     const { encoding = 'utf-8', onTransformError, ...fileStreamOptions } = options ?? {}
 
-    return this._transformFileStream(
+    return this._transformFileStream({
       from,
-      async function* (source) {
+      options: fileStreamOptions,
+      to,
+      transform: async function* _transform(source: ReadStream) {
+        source.setEncoding(encoding)
+
         for await (const chunk of source) {
           try {
             yield await transform(chunk)
           } catch(err) {
-            if (onTransformError) onTransformError(chunk, err)
-            else throw err
+            if (onTransformError) {onTransformError(chunk, err)}
+            else {throw err}
           }
         }
-      },
-      to,
-      fileStreamOptions
-    )
+      }
+    })
   }
 }

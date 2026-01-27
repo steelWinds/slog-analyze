@@ -1,5 +1,5 @@
+import { type ConsolaInstance, consola } from 'consola';
 import chalk from 'chalk';
-import { consola, type ConsolaInstance } from 'consola';
 
 export class Logger {
   static log(msg: string) {
@@ -27,12 +27,14 @@ export class Logger {
   }
 }
 
-export function log(_: any, propertyKey: string, descriptor: PropertyDescriptor) {
-  if (import.meta.env.TSDOWN_MODE === 'production') return;
+export const log = (_target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  if (import.meta.env.TSDOWN_MODE === 'production') {
+    return
+  }
 
   const originalMethod = descriptor.value;
 
-  descriptor.value = function (...args: any[]) {
+  descriptor.value = function  value(...args: any[]) {
     Logger.start(`Entering method ${propertyKey}`);
 
     try {
@@ -42,7 +44,7 @@ export function log(_: any, propertyKey: string, descriptor: PropertyDescriptor)
         return result
           .then((res) => res)
           .catch((err) => {
-            Logger.error(`Error in method ${propertyKey}: ${err instanceof Error ? err.message : String(err)}`);
+            Logger.error(`Error in method ${propertyKey}: ${err.message}`);
 
             throw err;
           })
@@ -52,8 +54,8 @@ export function log(_: any, propertyKey: string, descriptor: PropertyDescriptor)
       Logger.log(`Exiting method ${propertyKey}`);
 
       return result;
-    } catch (err) {
-      Logger.error(`Error in method ${propertyKey}: ${err instanceof Error ? err.message : String(err)}`);
+    } catch (err: any) {
+      Logger.error(`Error in method ${propertyKey}: ${err.message}`);
 
       throw err;
     }

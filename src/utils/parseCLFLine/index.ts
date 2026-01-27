@@ -1,7 +1,7 @@
-import { FIELDS, FORMATS } from '@/utils/parseCLFLine/constants.ts';
+import { FIELDS, FORMATS, START_WITHOUT_INSTANCE_STRING } from '@/utils/parseCLFLine/constants.ts';
 import type { FormatCLF } from '@/utils/parseCLFLine/types.ts';
 
-export function parseCLFLine(line: string) {
+export const parseCLFLine = (line: string) => {
   let matchesExec: RegExpExecArray | null = null
   let formatName: FormatCLF | null = null
 
@@ -21,7 +21,7 @@ export function parseCLFLine(line: string) {
 
   const formatted = Object.fromEntries(
     matchesExec
-      .slice(1)
+      .slice(START_WITHOUT_INSTANCE_STRING)
       .map((value, idx) => [FIELDS[formatName][idx], value])
   )
 

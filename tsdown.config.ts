@@ -2,13 +2,10 @@ import { defineConfig } from 'tsdown'
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
-  entry: 'bin/slog-analyze.ts',
-  platform: 'node',
-  outDir: './build',
   alias: {
     '@': fileURLToPath(new URL('./src', import.meta.url)),
   },
-  ignoreWatch: ['node_modules', 'build', '__tests__'],
+  entry: 'bin/slog-analyze.ts',
   external: [
     'fs',
     'fs/promises',
@@ -21,5 +18,8 @@ export default defineConfig({
     'chalk',
     'ora',
     'consola'
-  ]
+  ],
+  ignoreWatch: ['node_modules', 'build', '__tests__'],
+  outDir: './build',
+  platform: 'node'
 })

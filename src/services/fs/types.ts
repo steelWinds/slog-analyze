@@ -4,13 +4,20 @@ export type AsyncTransformGenerator = (source: ReadStream) => AsyncGenerator<Buf
 
 export type TransformFunction<TChunk, TResult> = (chunk: TChunk) => TResult | Promise<TResult>
 
-export type TransformFileStreamOptions = {
+export interface TransformFileStreamOptions {
   read?: ReadStreamOptions,
   write?: WriteStreamOptions,
   onError?: (err: unknown) => void
 }
 
-export type TransformTextStreamOptions = TransformFileStreamOptions & {
+export interface TransformTextStreamOptions extends TransformFileStreamOptions {
   encoding?: BufferEncoding
   onTransformError?: (chunk: Buffer, err: unknown) => void
+}
+
+export interface TransformFileStreamParams<TTransform, TOptions> {
+  from: string
+  to: string,
+  transform: TTransform,
+  options?: TOptions
 }
