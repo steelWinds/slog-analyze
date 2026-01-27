@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { vi } from 'vitest';
 
 // For stub logging functionality
-vi.mock(import('consola'))
+vi.mock(import('consola'));

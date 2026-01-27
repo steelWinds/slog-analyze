@@ -1,2 +1,2 @@
-export * from './analyze.command.ts'
-export * from './analyze.config.ts'
+export * from './analyze.command.ts';
+export * from './analyze.config.ts';

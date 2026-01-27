@@ -1,30 +1,37 @@
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "categories": {
-    "correctness": "error",
-    "suspicious": "error",
-    "style": "error"
-  },
-  "plugins": ["eslint"],
-  "rules": {
-    "max-statements": "off",
-    "no-unused-vars": "error",
-    "eqeqeq": ["error", "always", { "null": "ignore" }],
-    "no-magic-numbers": ["error", {
-      "ignoreArrayIndexes": true,
-      "ignoreNumericLiteralTypes": true,
-      "ignoreTypeIndexes": true
-    }],
-    "no-debugger": "error",
-    "no-eval": "error",
-    "func-style": ["error", "expression", {
-      "allowArrowFunctions": true,
-      "allowTypeAnnotation": true,
-    }]
-  },
-  "env": {
-    "es2022": true,
-    "browser": true,
-    "node": true
-  }
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"style": "error"
+	},
+	"plugins": ["eslint"],
+	"rules": {
+		"max-statements": "off",
+		"no-unused-vars": "error",
+		"eqeqeq": ["error", "always", { "null": "ignore" }],
+		"no-magic-numbers": [
+			"error",
+			{
+				"ignoreArrayIndexes": true,
+				"ignoreNumericLiteralTypes": true,
+				"ignoreTypeIndexes": true
+			}
+		],
+		"no-debugger": "error",
+		"no-eval": "error",
+		"func-style": [
+			"error",
+			"expression",
+			{
+				"allowArrowFunctions": true,
+				"allowTypeAnnotation": true
+			}
+		]
+	},
+	"env": {
+		"es2022": true,
+		"browser": true,
+		"node": true
+	}
 }

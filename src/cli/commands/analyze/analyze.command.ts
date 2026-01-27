@@ -1,1 +1,1 @@
-export const analyze = (path: string) => path
+export const analyze = (path: string) => path;
