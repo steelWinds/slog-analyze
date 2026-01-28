@@ -2,8 +2,8 @@ import {
 	FIELDS,
 	FORMATS,
 	START_WITHOUT_INSTANCE_STRING,
-} from '@/utils/parseCLFLine/constants.ts';
-import type { FormatCLF, ParsedCLF } from '@/utils/parseCLFLine/types.ts';
+} from '@/utils/parse-clf-Line/constants.ts';
+import type { FormatCLF, ParsedCLF } from '@/utils/parse-clf-Line/types.ts';
 
 export const parseCLFLine = (line: string): ParsedCLF | null => {
 	let matchesExec: RegExpExecArray | null = null;

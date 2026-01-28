@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { faker } from '@faker-js/faker/locale/en';
-import { parseCLFLine } from '@/utils/parseCLFLine/index.ts';
+import { parseCLFLine } from '@/utils/parse-clf-Line/index.ts';
 
 test('Parse valid CLF Lines', async () => {
 	const logLineCombined =
