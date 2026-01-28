@@ -4,7 +4,6 @@ import { consola } from 'consola';
 import { faker } from '@faker-js/faker/locale/en';
 
 test('Prompt output', async () => {
-	// oxlint-disable-next-line no-magic-numbers
 	const msg = faker.lorem.words(1);
 
 	const spy = vi
