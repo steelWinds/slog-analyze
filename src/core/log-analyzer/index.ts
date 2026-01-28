@@ -22,9 +22,14 @@ export class LogAnalyzer {
 			new Date(entry.dateTime),
 			(this._state.trafficByHour.get(new Date(entry.dateTime)) || 0) + 1,
 		);
+
+		this._state.statusCodes.set(
+			entry.statusCode,
+			(this._state.statusCodes.get(entry.statusCode) || 0) + 1,
+		);
 	}
 
-	get state() {
+	getResult() {
 		return this._state;
 	}
 }

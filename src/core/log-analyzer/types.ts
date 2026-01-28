@@ -15,4 +15,5 @@ export interface LogAnalyzerState {
 	uniqueIPs: Set<string>;
 	requests: Map<string, number>;
 	trafficByHour: Map<Date, number>;
+	statusCodes: Map<string, number>;
 }
