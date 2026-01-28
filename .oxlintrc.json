@@ -13,6 +13,7 @@
 		"no-magic-numbers": "off",
 		"no-debugger": "error",
 		"no-eval": "error",
+		"id-length": "off",
 		"func-style": [
 			"error",
 			"expression",
