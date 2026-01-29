@@ -7,6 +7,7 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"useDefineForClassFields": true,
+		"strictPropertyInitialization": false,
 
 		/* Bundler mode */
 		"moduleResolution": "NodeNext",

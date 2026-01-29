@@ -1,35 +1,58 @@
-import type { LogAnalyzerState, LogEntry } from '@/core/log-analyzer/types.ts';
-import { INITIAL_STATE } from '@/core/log-analyzer/constants.ts';
+import type {
+	LogAnalyzerResult,
+	LogAnalyzerState,
+	LogEntry,
+} from '@/core/log-analyzer/types.ts';
 
 export class LogAnalyzer {
-	private _state: LogAnalyzerState = { ...INITIAL_STATE };
+	private _state: LogAnalyzerState;
+
+	constructor() {
+		this.reset();
+	}
 
 	reset() {
-		this._state = { ...INITIAL_STATE };
+		this._state = {
+			requests: {},
+			statusCodes: {},
+			totalRequests: 0,
+			trafficByHour: {},
+			uniqueRemoteHosts: new Set(),
+		};
 	}
 
 	combine(entry: LogEntry): void {
 		this._state.totalRequests++;
 
-		this._state.uniqueIPs.add(entry.remoteHost);
+		this._state.uniqueRemoteHosts.add(entry.remoteHost);
 
-		this._state.requests.set(
-			entry.request,
-			(this._state.requests.get(entry.request) || 0) + 1,
-		);
+		this._mutationIncrementValue(this._state.requests, entry.request);
 
-		this._state.trafficByHour.set(
-			new Date(entry.dateTime),
-			(this._state.trafficByHour.get(new Date(entry.dateTime)) || 0) + 1,
-		);
+		const hour = new Date(entry.dateTime).getUTCHours().toString();
 
-		this._state.statusCodes.set(
-			entry.statusCode,
-			(this._state.statusCodes.get(entry.statusCode) || 0) + 1,
-		);
+		this._mutationIncrementValue(this._state.trafficByHour, hour);
+
+		this._mutationIncrementValue(this._state.statusCodes, entry.statusCode);
 	}
 
-	getResult() {
-		return this._state;
+	getResult(): LogAnalyzerResult {
+		return {
+			topRequests: this._sortDesc(this._state.requests),
+			topStatusCodes: this._sortDesc(this._state.statusCodes),
+			topTrafficHours: this._sortDesc(this._state.trafficByHour),
+			totalRequests: this._state.totalRequests,
+			uniqueRemoteHostsCount: this._state.uniqueRemoteHosts.size,
+		};
+	}
+
+	private _sortDesc<TKey extends string>(entry: Record<TKey, number>) {
+		return Object.entries<number>(entry).sort(([, a], [, b]) => b - a);
+	}
+
+	private _mutationIncrementValue<TKey extends string>(
+		entry: Record<TKey, number>,
+		key: TKey,
+	) {
+		entry[key] = (entry[key] || 0) + 1;
 	}
 }

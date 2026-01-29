@@ -12,8 +12,16 @@ export interface LogEntry {
 
 export interface LogAnalyzerState {
 	totalRequests: number;
-	uniqueIPs: Set<string>;
-	requests: Map<string, number>;
-	trafficByHour: Map<Date, number>;
-	statusCodes: Map<string, number>;
+	uniqueRemoteHosts: Set<string>;
+	requests: Record<string, number>;
+	trafficByHour: Record<string, number>;
+	statusCodes: Record<string, number>;
+}
+
+export interface LogAnalyzerResult {
+	totalRequests: number;
+	uniqueRemoteHostsCount: number;
+	topRequests: Array<[string, number]>;
+	topTrafficHours: Array<[string, number]>;
+	topStatusCodes: Array<[string, number]>;
 }
