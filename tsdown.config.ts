@@ -18,6 +18,7 @@ export default defineConfig({
 		'chalk',
 		'yocto-spinner',
 		'consola',
+		'chrono-node',
 	],
 	ignoreWatch: ['node_modules', 'build', '__tests__'],
 	outDir: './build',
