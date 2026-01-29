@@ -2,7 +2,7 @@ import type {
 	LogAnalyzerResult,
 	LogAnalyzerState,
 	LogEntry,
-} from '@/core/log-analyzer/types.ts';
+} from '@/core/logAnalyzer/types.ts';
 
 export class LogAnalyzer {
 	private _state: LogAnalyzerState;
