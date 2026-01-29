@@ -1,10 +1,12 @@
+import type { ParsedCLF } from './types.ts';
+
 export const FORMATS = {
 	BASIC: /^(\S+) (\S+) (\S+) \[([^\]]+)\] "([^"]*)" (\d{3}) (\S+)$/,
 	COMBINED:
 		/^(\S+) (\S+) (\S+) \[([^\]]+)\] "([^"]*)" (\d{3}) (\S+) "([^"]*)" "([^"]*)"$/,
 } as const;
 
-export const FIELDS: Record<keyof typeof FORMATS, string[]> = {
+export const FIELDS: Record<keyof typeof FORMATS, Array<keyof ParsedCLF>> = {
 	BASIC: [
 		'remoteHost',
 		'rfc931',

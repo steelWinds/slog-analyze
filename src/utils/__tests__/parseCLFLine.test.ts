@@ -3,18 +3,19 @@ import {
 	FORMATS,
 	START_WITHOUT_INSTANCE_STRING,
 } from '@/utils/parseCLFLine/constants.ts';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { DEFAULT_FORMATS } from '@/utils/parseCLFLine/config.ts';
 import type { ParsedCLF } from '@/utils/parseCLFLine/types.ts';
 import { faker } from '@faker-js/faker';
 import { parseCLFLine } from '@/utils/parseCLFLine/index.ts';
 
 describe('parseCLFLine constants', () => {
-	test('should have correct FORMATS', () => {
+	it('should have correct FORMATS', () => {
 		expect(FORMATS.BASIC).toBeInstanceOf(RegExp);
 		expect(FORMATS.COMBINED).toBeInstanceOf(RegExp);
 	});
 
-	test('should have correct FIELDS', () => {
+	it('should have correct FIELDS', () => {
 		expect(FIELDS.BASIC).toEqual([
 			'remoteHost',
 			'rfc931',
@@ -37,7 +38,7 @@ describe('parseCLFLine constants', () => {
 		]);
 	});
 
-	test('should have correct START_WITHOUT_INSTANCE_STRING', () => {
+	it('should have correct START_WITHOUT_INSTANCE_STRING', () => {
 		expect(START_WITHOUT_INSTANCE_STRING).toBe(1);
 	});
 });
@@ -75,19 +76,23 @@ describe('parseCLFLine', () => {
 		return `${basic} ${referrer} ${userAgent}`;
 	};
 
-	test('should return null for empty string', () => {
+	it('should return null for empty string', () => {
 		expect(parseCLFLine('')).toBeNull();
 	});
 
-	test('should return null for malformed string', () => {
+	it('should return null for malformed string', () => {
 		expect(parseCLFLine(faker.lorem.sentence())).toBeNull();
 	});
 
-	test('should correctly parse BASIC format', () => {
+	it('should correctly parse BASIC format', () => {
 		const remoteHost = faker.internet.ip();
 		const rfc931 = faker.string.alphanumeric(5);
 		const authUser = faker.internet.username();
-		const dateTime = `[${faker.date.recent().toUTCString().replace('GMT', '+0000')}]`;
+		const dateString = faker.date
+			.recent()
+			.toUTCString()
+			.replace('GMT', '+0000');
+		const dateTime = `[${dateString}]`;
 		const request = `"GET /index.html HTTP/1.1"`;
 		const statusCode = '200';
 		const bytesSent = '1234';
@@ -97,20 +102,24 @@ describe('parseCLFLine', () => {
 
 		expect(result).toEqual({
 			authUser,
-			bytesSent,
-			dateTime: dateTime.slice(1, -1),
+			bytesSent: 1234,
+			dateTime: DEFAULT_FORMATS.dateTime(dateString),
 			remoteHost,
 			request: request.slice(1, -1),
 			rfc931,
-			statusCode,
+			statusCode: 200,
 		});
 	});
 
-	test('should correctly parse COMBINED format', () => {
+	it('should correctly parse COMBINED format', () => {
 		const remoteHost = faker.internet.ip();
 		const rfc931 = '-';
 		const authUser = faker.internet.username();
-		const dateTime = `[${faker.date.recent().toUTCString().replace('GMT', '+0000')}]`;
+		const dateString = faker.date
+			.recent()
+			.toUTCString()
+			.replace('GMT', '+0000');
+		const dateTime = `[${dateString}]`;
 		const request = `"POST /api/data HTTP/1.0"`;
 		const statusCode = '404';
 		const bytesSent = '0';
@@ -122,33 +131,37 @@ describe('parseCLFLine', () => {
 
 		expect(result).toEqual({
 			authUser,
-			bytesSent,
-			dateTime: dateTime.slice(1, -1),
+			bytesSent: 0,
+			dateTime: DEFAULT_FORMATS.dateTime(dateString),
 			referrer: referrer.slice(1, -1),
 			remoteHost,
 			request: request.slice(1, -1),
 			rfc931,
-			statusCode,
+			statusCode: 404,
 			userAgent: userAgent.slice(1, -1),
 		});
 	});
 
-	test('should handle dashes in fields correctly', () => {
-		const line = '- - - [-] "-" 000 -';
+	it('should handle dashes in fields correctly', () => {
+		const dateString = faker.date
+			.recent()
+			.toUTCString()
+			.replace('GMT', '+0000');
+		const line = `- - - [${dateString}] "-" 000 -`;
 		const result = parseCLFLine(line);
 
 		expect(result).toEqual({
 			authUser: '-',
-			bytesSent: '-',
-			dateTime: '-',
+			bytesSent: NaN,
+			dateTime: DEFAULT_FORMATS.dateTime(dateString),
 			remoteHost: '-',
 			request: '-',
 			rfc931: '-',
-			statusCode: '000',
+			statusCode: 0,
 		});
 	});
 
-	test('should parse multiple random BASIC lines', () => {
+	it('should parse multiple random BASIC lines', () => {
 		for (let i = 0; i < 10; i++) {
 			const line = generateBasicCLF();
 			const result = parseCLFLine(line);
@@ -156,13 +169,16 @@ describe('parseCLFLine', () => {
 			expect(result).toBeTruthy();
 			expect(result).toHaveProperty('remoteHost');
 			expect(result).toHaveProperty('statusCode');
+			expect(typeof result?.statusCode).toBe('number');
 			expect(result).toHaveProperty('bytesSent');
+			expect(typeof result?.bytesSent).toBe('number');
+			expect(result?.dateTime).toBeInstanceOf(Date);
 			expect(result?.referrer).toBeUndefined();
 			expect(result?.userAgent).toBeUndefined();
 		}
 	});
 
-	test('should parse multiple random COMBINED lines', () => {
+	it('should parse multiple random COMBINED lines', () => {
 		for (let i = 0; i < 10; i++) {
 			const line = generateCombinedCLF();
 			const result = parseCLFLine(line);
@@ -170,10 +186,13 @@ describe('parseCLFLine', () => {
 			expect(result).toBeTruthy();
 			expect(result).toHaveProperty('referrer');
 			expect(result).toHaveProperty('userAgent');
+			expect(result?.dateTime).toBeInstanceOf(Date);
+			expect(typeof result?.statusCode).toBe('number');
+			expect(typeof result?.bytesSent).toBe('number');
 		}
 	});
 
-	test('should handle special characters in request', () => {
+	it('should handle special characters in request', () => {
 		const request = `"GET /search?q=${encodeURIComponent('test&data=value')} HTTP/1.1"`;
 		const line = generateBasicCLF({ request });
 		const result = parseCLFLine(line);
@@ -181,19 +200,122 @@ describe('parseCLFLine', () => {
 		expect(result?.request).toBe(request.slice(1, -1));
 	});
 
-	test('should parse numeric bytesSent', () => {
+	it('should handle quotes in user agent', () => {
+		const userAgent = '"Mozilla/5.0 (compatible; "Test Bot")"';
+		const line = generateCombinedCLF({ userAgent });
+		const result = parseCLFLine(line);
+
+		expect(result).toBeNull();
+	});
+
+	it('should parse numeric bytesSent', () => {
 		const bytesSent = faker.number.int({ max: 1000000, min: 0 }).toString();
 		const line = generateBasicCLF({ bytesSent });
 		const result = parseCLFLine(line);
 
-		expect(result?.bytesSent).toBe(bytesSent);
+		expect(typeof result?.bytesSent).toBe('number');
+		expect(result?.bytesSent).toBe(Number(bytesSent));
 	});
 
-	test('should handle invalid bytesSent as string', () => {
+	it('should handle invalid bytesSent as NaN', () => {
 		const bytesSent = '-';
 		const line = generateBasicCLF({ bytesSent });
 		const result = parseCLFLine(line);
 
-		expect(result?.bytesSent).toBe('-');
+		expect(Number.isNaN(result?.bytesSent)).toBe(true);
+	});
+
+	describe('with custom formats', () => {
+		it('should use custom format function for specific field', () => {
+			const customFormats = {
+				authUser: (value: string) => value.toUpperCase(),
+				statusCode: (value: string) => parseInt(value) * 2,
+			};
+
+			const line = generateBasicCLF({
+				authUser: 'testuser',
+				statusCode: '200',
+			});
+			const result = parseCLFLine(line, customFormats);
+
+			expect(result?.statusCode).toBe(400);
+			expect(result?.authUser).toBe('TESTUSER');
+		});
+
+		it('should merge custom formats with default formats', () => {
+			const customFormats = {
+				remoteHost: () => 'custom-host',
+			};
+
+			const line = generateBasicCLF();
+			const result = parseCLFLine(line, customFormats);
+
+			expect(result?.remoteHost).toBe('custom-host');
+			expect(result?.dateTime).toBeInstanceOf(Date);
+			expect(typeof result?.statusCode).toBe('number');
+		});
+
+		it('should handle empty custom formats object', () => {
+			const line = generateBasicCLF({ statusCode: '200' });
+			const result = parseCLFLine(line, {});
+
+			expect(result?.statusCode).toBe(200);
+		});
+
+		it('should apply custom format to all fields when provided', () => {
+			const customFormats = {
+				authUser: () => 'custom-auth',
+				bytesSent: () => 888,
+				dateTime: () => new Date('2023-01-01'),
+				referrer: () => 'custom-referrer',
+				remoteHost: () => 'custom-remote',
+				request: () => 'custom-request',
+				rfc931: () => 'custom-rfc',
+				statusCode: () => 999,
+				userAgent: () => 'custom-agent',
+			};
+
+			const line = generateCombinedCLF();
+			const result = parseCLFLine(line, customFormats);
+
+			expect(result).toEqual({
+				authUser: 'custom-auth',
+				bytesSent: 888,
+				dateTime: new Date('2023-01-01'),
+				referrer: 'custom-referrer',
+				remoteHost: 'custom-remote',
+				request: 'custom-request',
+				rfc931: 'custom-rfc',
+				statusCode: 999,
+				userAgent: 'custom-agent',
+			});
+		});
+
+		it('should handle custom format that returns different types', () => {
+			const customFormats = {
+				bytesSent: (value: string) => `bytes-${value}`,
+				statusCode: (value: string) => `code-${value}`,
+			};
+
+			const line = generateBasicCLF({ bytesSent: '1234', statusCode: '200' });
+			const result = parseCLFLine(line, customFormats);
+
+			expect(result?.statusCode).toBe('code-200');
+			expect(result?.bytesSent).toBe('bytes-1234');
+		});
+
+		it('should work with partial custom formats for COMBINED format', () => {
+			const customFormats = {
+				referrer: () => 'no-referrer',
+				userAgent: (value: string) => value.toLowerCase(),
+			};
+
+			const userAgent = `"${faker.internet.userAgent().toUpperCase()}"`;
+			const line = generateCombinedCLF({ userAgent });
+			const result = parseCLFLine(line, customFormats);
+
+			expect(result?.userAgent).toBe(userAgent.slice(1, -1).toLowerCase());
+			expect(result?.referrer).toBe('no-referrer');
+		});
 	});
 });

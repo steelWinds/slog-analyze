@@ -6,10 +6,10 @@ export interface ParsedCLF {
 	remoteHost: string;
 	rfc931: string;
 	authUser: string;
-	dateTime: string;
+	dateTime: Date;
 	request: string;
-	statusCode: string;
-	bytesSent: string;
+	statusCode: string | number;
+	bytesSent: string | number;
 	referrer?: string;
 	userAgent?: string;
 }
