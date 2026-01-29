@@ -45,11 +45,16 @@ export class LogAnalyzer {
 		};
 	}
 
-	private _sortDesc<TKey extends string>(entry: Record<TKey, number>) {
-		return Object.entries<number>(entry).sort(([, a], [, b]) => b - a);
+	private _sortDesc<TKey extends string | number | symbol>(
+		entry: Record<TKey, number>,
+	) {
+		return Object.entries<number>(entry).sort(([, a], [, b]) => b - a) as [
+			TKey,
+			number,
+		][];
 	}
 
-	private _mutationIncrementValue<TKey extends string>(
+	private _mutationIncrementValue<TKey extends string | number | symbol>(
 		entry: Record<TKey, number>,
 		key: TKey,
 	) {

@@ -12,7 +12,7 @@ describe('LogAnalyzer', () => {
 		mockEntry = {
 			authUser: faker.string.alphanumeric(6),
 			bytesSent: faker.string.numeric(4),
-			dateTime: faker.date.recent().toISOString(),
+			dateTime: faker.date.recent(),
 			remoteHost: faker.internet.ip(),
 			request: faker.internet.url(),
 			rfc931: faker.string.alphanumeric(8),
@@ -81,9 +81,9 @@ describe('LogAnalyzer', () => {
 			const date2 = new Date('2024-01-01T10:45:00Z');
 			const date3 = new Date('2024-01-01T14:20:00Z');
 
-			analyzer.combine({ ...mockEntry, dateTime: date1.toISOString() });
-			analyzer.combine({ ...mockEntry, dateTime: date2.toISOString() });
-			analyzer.combine({ ...mockEntry, dateTime: date3.toISOString() });
+			analyzer.combine({ ...mockEntry, dateTime: date1 });
+			analyzer.combine({ ...mockEntry, dateTime: date2 });
+			analyzer.combine({ ...mockEntry, dateTime: date3 });
 
 			const result = analyzer.getResult();
 
@@ -111,7 +111,7 @@ describe('LogAnalyzer', () => {
 			const minimalEntry: LogEntry = {
 				authUser: '',
 				bytesSent: '0',
-				dateTime: faker.date.recent().toISOString(),
+				dateTime: faker.date.recent(),
 				remoteHost: faker.internet.ip(),
 				request: faker.internet.url(),
 				rfc931: '',
