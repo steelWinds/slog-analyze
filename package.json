@@ -46,7 +46,7 @@
 		"chalk": "^5.6.2",
 		"commander": "^14.0.2",
 		"consola": "^3.4.2",
-		"ora": "^9.0.0"
+		"yocto-spinner": "^1.0.0"
 	},
 	"devDependencies": {
 		"@commander-js/extra-typings": "^14.0.0",

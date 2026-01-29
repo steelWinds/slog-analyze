@@ -16,7 +16,7 @@ export default defineConfig({
 		'commander',
 		'@commander-js/extra-typings',
 		'chalk',
-		'ora',
+		'yocto-spinner',
 		'consola',
 	],
 	ignoreWatch: ['node_modules', 'build', '__tests__'],
