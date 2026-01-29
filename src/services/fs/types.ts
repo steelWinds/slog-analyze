@@ -16,6 +16,7 @@ export interface TransformFileStreamOptions {
 
 export interface TransformTextStreamOptions extends TransformFileStreamOptions {
 	encoding?: BufferEncoding;
+	readline?: boolean;
 	onTransformError?: (chunk: string, err: unknown) => void;
 }
 

@@ -6,6 +6,7 @@ import type {
 	TransformTextStreamOptions,
 } from '@/services/fs/types.ts';
 import { ReadStream, createReadStream, createWriteStream } from 'node:fs';
+import { createInterface } from 'node:readline';
 import { log } from '@/utils/logger/index.ts';
 import { pipeline } from 'node:stream/promises';
 
@@ -47,6 +48,7 @@ export class FileStreamService {
 
 		const {
 			encoding = 'utf-8',
+			readline,
 			onTransformError,
 			...fileStreamOptions
 		} = options ?? {};
@@ -58,12 +60,23 @@ export class FileStreamService {
 			transform: async function* _transform(source: ReadStream) {
 				source.setEncoding(encoding);
 
-				for await (const chunk of source) {
+				let _source;
+
+				if (readline) {
+					_source = createInterface({
+						crlfDelay: Infinity,
+						input: source,
+					});
+				} else {
+					_source = source;
+				}
+
+				for await (const line of _source) {
 					try {
-						yield await transform(chunk);
+						yield await transform(line);
 					} catch (err) {
 						if (onTransformError) {
-							onTransformError(chunk, err);
+							onTransformError(line, err);
 						} else {
 							throw err;
 						}

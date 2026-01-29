@@ -48,6 +48,136 @@ describe('FileStreamService', () => {
 			expect(transformMock).toHaveBeenCalled();
 		});
 
+		test('reads file line by line when readline option is true', async () => {
+			const lines = ['first line', 'second line', 'third line'];
+			const content = lines.join('\n');
+
+			const pathInputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+			const pathOutputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+
+			fs.writeFileSync(pathInputFile, content);
+
+			const fsService = new FileStreamService();
+			const transformMock = vi.fn((line) => `${line}\n`);
+
+			await fsService.transformTextStream({
+				from: pathInputFile,
+				options: { readline: true },
+				to: pathOutputFile,
+				transform: transformMock,
+			});
+
+			const output = fs.readFileSync(pathOutputFile, 'utf-8');
+			expect(output).toBe(`${content}\n`);
+			expect(transformMock).toHaveBeenCalledTimes(3);
+			expect(transformMock).toHaveBeenCalledWith('first line');
+			expect(transformMock).toHaveBeenCalledWith('second line');
+			expect(transformMock).toHaveBeenCalledWith('third line');
+		});
+
+		test('handles empty file with readline option', async () => {
+			const pathInputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+			const pathOutputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+
+			fs.writeFileSync(pathInputFile, '');
+
+			const fsService = new FileStreamService();
+			const transformMock = vi.fn();
+
+			await fsService.transformTextStream({
+				from: pathInputFile,
+				options: { readline: true },
+				to: pathOutputFile,
+				transform: transformMock,
+			});
+
+			const output = fs.readFileSync(pathOutputFile, 'utf-8');
+			expect(output).toBe('');
+			expect(transformMock).not.toHaveBeenCalled();
+		});
+
+		test('processes file with CRLF line endings when readline is true', async () => {
+			const lines = ['first line', 'second line', 'third line'];
+			const content = lines.join('\r\n');
+
+			const pathInputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+			const pathOutputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+
+			fs.writeFileSync(pathInputFile, content);
+
+			const fsService = new FileStreamService();
+			const transformMock = vi.fn((line) => `${line}\n`);
+
+			await fsService.transformTextStream({
+				from: pathInputFile,
+				options: { readline: true },
+				to: pathOutputFile,
+				transform: transformMock,
+			});
+
+			const output = fs.readFileSync(pathOutputFile, 'utf-8');
+			expect(output).toBe('first line\nsecond line\nthird line\n');
+			expect(transformMock).toHaveBeenCalledTimes(3);
+		});
+
+		test('handles transform errors for specific lines when readline is true', async () => {
+			const lines = ['first line', 'second line', 'third line'];
+			const content = lines.join('\n');
+
+			const pathInputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+			const pathOutputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+
+			fs.writeFileSync(pathInputFile, content);
+
+			const fsService = new FileStreamService();
+			const error = new Error('Transform error');
+			const onTransformError = vi.fn();
+
+			let callCount = 0;
+			const transformMock = vi.fn(() => {
+				callCount++;
+				if (callCount === 2) {
+					throw error;
+				}
+				return 'transformed\n';
+			});
+
+			await fsService.transformTextStream({
+				from: pathInputFile,
+				options: { onTransformError, readline: true },
+				to: pathOutputFile,
+				transform: transformMock,
+			});
+
+			expect(onTransformError).toHaveBeenCalledTimes(1);
+			expect(onTransformError.mock.calls[0][0]).toBe('second line');
+			expect(onTransformError.mock.calls[0][1]).toBe(error);
+		});
+
 		test('handles transform errors with onTransformError callback', async () => {
 			const msg = faker.lorem.text();
 			const pathInputFile = format({
@@ -260,6 +390,35 @@ describe('FileStreamService', () => {
 				from: pathInputFile,
 				to: pathOutputFile,
 				transform: (chunk) => chunk.toUpperCase(),
+			});
+
+			const text = fs.readFileSync(pathOutputFile, 'utf-8');
+			expect(text).toBe(expected);
+		});
+
+		test('applies transform function to each line', async () => {
+			const lines = ['hello', 'world', 'test'];
+			const content = lines.join('\n');
+			const expected = 'HELLO\nWORLD\nTEST\n';
+
+			const pathInputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+			const pathOutputFile = format({
+				base: faker.system.commonFileName('txt'),
+				root: '/',
+			});
+
+			fs.writeFileSync(pathInputFile, content);
+
+			const fsService = new FileStreamService();
+
+			await fsService.transformTextStream({
+				from: pathInputFile,
+				options: { readline: true },
+				to: pathOutputFile,
+				transform: (line) => `${line.toUpperCase()}\n`,
 			});
 
 			const text = fs.readFileSync(pathOutputFile, 'utf-8');
