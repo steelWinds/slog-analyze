@@ -28,7 +28,10 @@ export class LogAnalyzer {
 
 		this._mutationIncrementValue(this._state.requests, entry.request);
 
-		const hour = new Date(entry.dateTime).getUTCHours().toString();
+		const hour = new Date(entry.dateTime)
+			.getUTCHours()
+			.toString()
+			.padStart(2, '0');
 
 		this._mutationIncrementValue(this._state.trafficByHour, hour);
 
