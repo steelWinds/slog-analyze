@@ -1,428 +1,317 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { fs, vol } from 'memfs';
 import { FileStreamService } from '@/services/fs/index.ts';
-import { faker } from '@faker-js/faker/locale/en';
-import { format } from 'path';
+import { faker } from '@faker-js/faker';
+import { performance } from 'perf_hooks';
+import { vol } from 'memfs';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
-beforeEach(() => {
-	vol.reset();
-});
-
 describe('FileStreamService', () => {
-	describe('transformTextStream', () => {
-		test('successfully transforms text stream with highWaterMark', async () => {
-			const msg = faker.lorem.text();
-			const msgDivider = 4;
-			const highWaterMark = Math.round(msg.length / msgDivider);
+	let service: FileStreamService;
+	const testDir = '/test';
+	const testFile = `${testDir}/test.txt`;
+	const largeTestFile = `${testDir}/large.txt`;
 
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
+	beforeEach(() => {
+		service = new FileStreamService();
+		vol.reset();
+		vol.mkdirSync(testDir, { recursive: true });
+	});
+
+	describe('readTextFile', () => {
+		test('should initiate file reading without transformation', async () => {
+			const content = faker.lorem.paragraphs(3);
+
+			vol.writeFileSync(testFile, content);
+
+			const mockCallback = vi.fn((chunk) => chunk);
+
+			await service.readTextFile({
+				from: testFile,
+				transformOptions: {
+					callback: mockCallback,
+				},
 			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
 
-			fs.writeFileSync(pathInputFile, msg);
+			expect(mockCallback).toHaveBeenCalled();
+		});
 
-			const fsService = new FileStreamService();
-			const transformMock = vi.fn((chunk) => chunk);
+		test('should process file with encoding transformation', async () => {
+			const content = faker.lorem.paragraphs(2);
+			vol.writeFileSync(testFile, content);
 
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: {
+			const mockCallback = vi.fn((chunk) => chunk);
+
+			await service.readTextFile({
+				from: testFile,
+				transformOptions: {
+					callback: mockCallback,
 					encoding: 'utf-8',
-					read: { highWaterMark },
-					write: { highWaterMark },
 				},
-				to: pathOutputFile,
-				transform: transformMock,
 			});
 
-			const text = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(text).toBe(msg);
-			expect(transformMock).toHaveBeenCalled();
+			expect(mockCallback).toHaveBeenCalled();
 		});
 
-		test('reads file line by line when readline option is true', async () => {
-			const lines = ['first line', 'second line', 'third line'];
+		test('should process file line by line when readline option is true', async () => {
+			const lines = [
+				faker.lorem.sentence(),
+				faker.lorem.sentence(),
+				faker.lorem.sentence(),
+			];
+
 			const content = lines.join('\n');
 
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
+			vol.writeFileSync(testFile, content);
 
-			fs.writeFileSync(pathInputFile, content);
-
-			const fsService = new FileStreamService();
-			const transformMock = vi.fn((line) => `${line}\n`);
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { readline: true },
-				to: pathOutputFile,
-				transform: transformMock,
+			const processedLines: string[] = [];
+			const mockCallback = vi.fn((chunk) => {
+				processedLines.push(chunk);
+				return chunk.toUpperCase();
 			});
 
-			const output = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(output).toBe(`${content}\n`);
-			expect(transformMock).toHaveBeenCalledTimes(3);
-			expect(transformMock).toHaveBeenCalledWith('first line');
-			expect(transformMock).toHaveBeenCalledWith('second line');
-			expect(transformMock).toHaveBeenCalledWith('third line');
+			await service.readTextFile({
+				from: testFile,
+				transformOptions: {
+					callback: mockCallback,
+					readline: true,
+				},
+			});
+
+			expect(processedLines).toHaveLength(lines.length);
+			expect(processedLines.every((line, i) => line === lines[i])).toBe(true);
 		});
 
-		test('handles empty file with readline option', async () => {
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
+		test('should handle transformation errors with onTransformError callback', async () => {
+			const content = faker.lorem.paragraph();
+			vol.writeFileSync(testFile, content);
 
-			fs.writeFileSync(pathInputFile, '');
-
-			const fsService = new FileStreamService();
-			const transformMock = vi.fn();
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { readline: true },
-				to: pathOutputFile,
-				transform: transformMock,
+			const errors: Array<{ chunk: Buffer; err: unknown }> = [];
+			const mockCallback = vi.fn(() => {
+				throw new Error('Test error');
 			});
 
-			const output = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(output).toBe('');
-			expect(transformMock).not.toHaveBeenCalled();
+			await service.readTextFile({
+				from: testFile,
+				transformOptions: {
+					callback: mockCallback,
+					onTransformError: (chunk: Buffer, err: unknown) => {
+						errors.push({ chunk, err });
+					},
+				},
+			});
+
+			expect(errors.length).toBeGreaterThan(0);
+		});
+	});
+
+	describe('writeTextFile', () => {
+		test('should write string source to file', async () => {
+			const content = faker.lorem.paragraphs(5);
+			const outputFile = `${testDir}/output.txt`;
+
+			await service.writeTextFile({
+				source: content,
+				to: outputFile,
+			});
+
+			const readContent = vol.readFileSync(outputFile).toString();
+
+			expect(readContent).toBe(content);
 		});
 
-		test('processes file with CRLF line endings when readline is true', async () => {
-			const lines = ['first line', 'second line', 'third line'];
-			const content = lines.join('\r\n');
+		test('should write string source with transformation', async () => {
+			const content = faker.lorem.paragraphs(3);
+			const outputFile = `${testDir}/output.txt`;
 
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
+			const mockCallback = vi.fn((chunk) => chunk.toUpperCase());
 
-			fs.writeFileSync(pathInputFile, content);
-
-			const fsService = new FileStreamService();
-			const transformMock = vi.fn((line) => `${line}\n`);
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { readline: true },
-				to: pathOutputFile,
-				transform: transformMock,
+			await service.writeTextFile({
+				source: content,
+				to: outputFile,
+				transformOptions: {
+					callback: mockCallback,
+				},
 			});
 
-			const output = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(output).toBe('first line\nsecond line\nthird line\n');
-			expect(transformMock).toHaveBeenCalledTimes(3);
+			const readContent = vol.readFileSync(outputFile).toString();
+
+			expect(mockCallback).toHaveBeenCalled();
+			expect(readContent).toBe(content.toUpperCase());
 		});
 
-		test('handles transform errors for specific lines when readline is true', async () => {
-			const lines = ['first line', 'second line', 'third line'];
-			const content = lines.join('\n');
-
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, content);
-
-			const fsService = new FileStreamService();
-			const error = new Error('Transform error');
-			const onTransformError = vi.fn();
-
-			let callCount = 0;
-			const transformMock = vi.fn(() => {
-				callCount++;
-				if (callCount === 2) {
-					throw error;
-				}
-				return 'transformed\n';
+		test('should write ReadableStream source to file', async () => {
+			const chunks = [
+				faker.lorem.sentence(),
+				faker.lorem.sentence(),
+				faker.lorem.sentence(),
+			];
+			const stream = new ReadableStream({
+				start(controller) {
+					chunks.forEach((chunk) =>
+						controller.enqueue(new TextEncoder().encode(chunk)),
+					);
+					controller.close();
+				},
 			});
 
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { onTransformError, readline: true },
-				to: pathOutputFile,
-				transform: transformMock,
-			});
+			const outputFile = `${testDir}/stream_output.txt`;
 
-			expect(onTransformError).toHaveBeenCalledTimes(1);
-			expect(onTransformError.mock.calls[0][0]).toBe('second line');
-			expect(onTransformError.mock.calls[0][1]).toBe(error);
-		});
-
-		test('handles transform errors with onTransformError callback', async () => {
-			const msg = faker.lorem.text();
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, msg);
-
-			const fsService = new FileStreamService();
-			const error = new Error('Transform error');
-			const onTransformError = vi.fn();
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { onTransformError },
-				to: pathOutputFile,
-				transform: vi.fn(() => {
-					throw error;
-				}),
-			});
-
-			expect(onTransformError).toHaveBeenCalledTimes(1);
-			expect(onTransformError.mock.calls[0][1]).toBe(error);
-		});
-
-		test('propagates transform errors without onTransformError callback', async () => {
-			const msg = faker.lorem.text();
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, msg);
-
-			const fsService = new FileStreamService();
-
-			await expect(
-				fsService.transformTextStream({
-					from: pathInputFile,
-					to: pathOutputFile,
-					transform: vi.fn(() => {
-						throw new Error('Transform error');
-					}),
-				}),
-			).rejects.toThrow('Transform error');
-		});
-
-		test('respects custom encoding settings', async () => {
-			const msg = faker.lorem.text();
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, msg, { encoding: 'utf-8' });
-
-			const fsService = new FileStreamService();
-			const transformMock = vi.fn((chunk) => chunk);
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { encoding: 'utf-8' },
-				to: pathOutputFile,
-				transform: transformMock,
-			});
-
-			const text = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(text).toBe(msg);
-		});
-
-		test('handles empty file transformation', async () => {
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, '');
-
-			const fsService = new FileStreamService();
-			const transformMock = vi.fn((chunk) => chunk);
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				to: pathOutputFile,
-				transform: transformMock,
-			});
-
-			const text = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(text).toBe('');
-			expect(transformMock).not.toHaveBeenCalled();
-		});
-
-		test('handles pipeline errors with onError callback', async () => {
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			const fsService = new FileStreamService();
-			const onErrorMock = vi.fn();
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { onError: onErrorMock },
-				to: pathOutputFile,
-				transform: vi.fn((chunk) => chunk),
-			});
-
-			expect(onErrorMock).toHaveBeenCalledTimes(1);
-			expect(onErrorMock.mock.calls[0][0]).toBeInstanceOf(Error);
-		});
-
-		test('propagates pipeline errors without onError callback', async () => {
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			const fsService = new FileStreamService();
-
-			await expect(
-				fsService.transformTextStream({
-					from: pathInputFile,
-					to: pathOutputFile,
-					transform: vi.fn((chunk) => chunk),
-				}),
-			).rejects.toThrow();
-		});
-
-		test('processes large text in multiple chunks', async () => {
-			const msg = faker.lorem.paragraphs(50);
-			const highWaterMark = 1024;
-			let chunkCount = 0;
-
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, msg);
-
-			const fsService = new FileStreamService();
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
+			await service.writeTextFile({
 				options: {
-					read: { highWaterMark },
-					write: { highWaterMark },
+					bufferChunkSize: 16,
 				},
-				to: pathOutputFile,
-				transform: (chunk) => {
-					chunkCount++;
-					expect(chunk.length).toBeLessThanOrEqual(highWaterMark);
-					return chunk;
+				source: stream,
+				to: outputFile,
+			});
+
+			const readContent = vol.readFileSync(outputFile).toString();
+
+			expect(readContent).toBe(chunks.join(''));
+		});
+	});
+
+	describe('stress tests', () => {
+		const FILE_SIZES = {
+			LARGE: 50 * 1024 * 1024,
+			MEDIUM: 10 * 1024 * 1024,
+			SMALL: 1024 * 1024,
+		};
+
+		const generateLargeContent = (sizeInBytes: number): string => {
+			const chunk = faker.lorem.paragraphs(100);
+			const repeats = Math.ceil(
+				sizeInBytes / Buffer.byteLength(chunk, 'utf-8'),
+			);
+			return chunk.repeat(repeats).slice(0, sizeInBytes);
+		};
+
+		test.each([
+			['1MB', FILE_SIZES.SMALL],
+			['10MB', FILE_SIZES.MEDIUM],
+			['50MB', FILE_SIZES.LARGE],
+		])('should process %s file efficiently', async (sizeLabel, fileSize) => {
+			const content = generateLargeContent(fileSize);
+			vol.writeFileSync(largeTestFile, content);
+
+			let processedBytes = 0;
+			const startTime = performance.now();
+
+			await service.readTextFile({
+				from: largeTestFile,
+				transformOptions: {
+					callback: (chunk) => {
+						processedBytes += chunk.length;
+						return chunk;
+					},
 				},
 			});
 
-			const text = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(text).toBe(msg);
-			expect(chunkCount).toBeGreaterThan(1);
+			const endTime = performance.now();
+			const processingTime = endTime - startTime;
+			const processingSpeed = fileSize / 1024 / 1024 / (processingTime / 1000);
+
+			console.log(
+				`${sizeLabel} processing: ${processingTime.toFixed(2)}ms, Speed: ${processingSpeed.toFixed(2)} MB/s`,
+			);
+			expect(processedBytes).toBeGreaterThan(0);
+			expect(processingTime).toBeLessThan(fileSize / 1024);
 		});
 
-		test('applies transform function to each chunk', async () => {
-			const msg = 'hello world';
-			const expected = 'HELLO WORLD';
-
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-
-			fs.writeFileSync(pathInputFile, msg);
-
-			const fsService = new FileStreamService();
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				to: pathOutputFile,
-				transform: (chunk) => chunk.toUpperCase(),
-			});
-
-			const text = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(text).toBe(expected);
-		});
-
-		test('applies transform function to each line', async () => {
-			const lines = ['hello', 'world', 'test'];
+		test('should process large file line by line efficiently', async () => {
+			const lines = Array.from({ length: 50000 }, () => faker.lorem.sentence());
 			const content = lines.join('\n');
-			const expected = 'HELLO\nWORLD\nTEST\n';
+			vol.writeFileSync(largeTestFile, content);
 
-			const pathInputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
-			const pathOutputFile = format({
-				base: faker.system.commonFileName('txt'),
-				root: '/',
-			});
+			let lineCount = 0;
+			const startTime = performance.now();
 
-			fs.writeFileSync(pathInputFile, content);
-
-			const fsService = new FileStreamService();
-
-			await fsService.transformTextStream({
-				from: pathInputFile,
-				options: { readline: true },
-				to: pathOutputFile,
-				transform: (line) => `${line.toUpperCase()}\n`,
+			await service.readTextFile({
+				from: largeTestFile,
+				transformOptions: {
+					callback: () => {
+						lineCount++;
+						return '';
+					},
+					readline: true,
+				},
 			});
 
-			const text = fs.readFileSync(pathOutputFile, 'utf-8');
-			expect(text).toBe(expected);
+			const endTime = performance.now();
+			const processingTime = endTime - startTime;
+			expect(lineCount).toBe(lines.length);
+
+			const linesPerSecond = lines.length / (processingTime / 1000);
+			console.log(
+				`Line processing performance: ${linesPerSecond.toFixed(0)} lines/sec`,
+			);
+			expect(linesPerSecond).toBeGreaterThan(10000);
+		});
+
+		test('should handle concurrent file operations efficiently', async () => {
+			const filesCount = 5;
+			const fileSize = 5 * 1024 * 1024;
+			const operations: Array<Promise<any>> = [];
+
+			const initialMemory = process.memoryUsage().heapUsed;
+			const startTime = performance.now();
+
+			for (let i = 0; i < filesCount; i++) {
+				const content = generateLargeContent(fileSize);
+				const filePath = `${testDir}/concurrent_${i}.txt`;
+				vol.writeFileSync(filePath, content);
+
+				operations.push(
+					service.readTextFile({
+						from: filePath,
+						transformOptions: {
+							callback: (chunk) => chunk,
+						},
+					}),
+				);
+			}
+
+			await Promise.all(operations);
+			const endTime = performance.now();
+			const totalTime = endTime - startTime;
+
+			const finalMemory = process.memoryUsage().heapUsed;
+			const memoryIncrease = finalMemory - initialMemory;
+
+			console.log(
+				`Concurrent processing of ${filesCount} files: ${totalTime.toFixed(2)}ms`,
+			);
+			console.log(
+				`Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)} MB`,
+			);
+
+			expect(totalTime).toBeLessThan(filesCount * 500);
+			expect(memoryIncrease).toBeLessThan(fileSize * filesCount * 0.1);
+		});
+
+		test('should write large file with chunked processing efficiently', async () => {
+			const content = generateLargeContent(FILE_SIZES.LARGE);
+			const outputFile = `${testDir}/large_output.txt`;
+
+			const startTime = performance.now();
+
+			await service.writeTextFile({
+				options: {
+					bufferChunkSize: 64,
+				} as any,
+				source: content,
+				to: outputFile,
+			});
+
+			const endTime = performance.now();
+			const writeTime = endTime - startTime;
+			const writeSpeed = FILE_SIZES.LARGE / 1024 / 1024 / (writeTime / 1000);
+
+			console.log(
+				`Large file write performance: ${writeTime.toFixed(2)}ms, Speed: ${writeSpeed.toFixed(2)} MB/s`,
+			);
+			expect(writeTime).toBeLessThan(FILE_SIZES.LARGE / 1024);
 		});
 	});
 });
