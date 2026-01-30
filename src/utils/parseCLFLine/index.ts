@@ -39,17 +39,12 @@ export const parseCLFLine = (
 		matchesExec.slice(START_WITHOUT_INSTANCE_STRING).map((value, idx) => {
 			const field = FIELDS[formatName][idx];
 
-			let _value;
-
-			if (_formats[field] instanceof Function) {
-				_value = _formats[field](value);
-			} else {
-				_value = value;
-			}
+			let _value =
+				_formats[field] instanceof Function ? _formats[field](value) : value;
 
 			return [field, _value];
 		}),
-	) as unknown as ParsedCLF;
+	) as any as ParsedCLF;
 
 	return formatted;
 };
