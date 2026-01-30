@@ -1,5 +1,5 @@
 export const analyzeConfig = {
-	arguments: '<file>',
+	arguments: '<from> <to>',
 	description: 'Analyze log file',
 	name: 'analyze',
-};
+} as const;

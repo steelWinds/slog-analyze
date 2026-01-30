@@ -1,5 +1,9 @@
 import { analyze, analyzeConfig } from '@/cli/commands/analyze/index.ts';
+import { extname, join } from 'node:path';
 import { Command } from '@commander-js/extra-typings';
+import { Logger } from '@/utils/logger/index.ts';
+import { SUPPORTED_LOG_EXTNAMES } from '@/cli/constants.ts';
+import { lstat } from 'node:fs/promises';
 
 export const run = () => {
 	const program = new Command();
@@ -13,8 +17,24 @@ export const run = () => {
 		.command(analyzeConfig.name)
 		.description(analyzeConfig.description)
 		.arguments(analyzeConfig.arguments)
-		.action((path) => {
-			analyze(path);
+		.action(async (from, to) => {
+			try {
+				const fromIsDirectory = (await lstat(from)).isFile();
+				const fromIsLogFile = SUPPORTED_LOG_EXTNAMES.includes(extname(from));
+				const toIsDirectory = (await lstat(to)).isDirectory();
+
+				if (!fromIsDirectory) {
+					throw new Error("Failed: from path is'nt a file");
+				} else if (!fromIsLogFile) {
+					throw new Error("Failed: from is'nt a log file");
+				} else if (!toIsDirectory) {
+					throw new Error('Failed: to is not a directory');
+				}
+
+				analyze(from, join(to, 'result.json'));
+			} catch (err: any) {
+				Logger.error(err.message);
+			}
 		});
 
 	program.parse();
