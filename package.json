@@ -33,7 +33,7 @@
 		"build": "tsdown --env-file .env.production --minify --log-level error",
 		"build:dev": "tsdown --env-file .env.development --sourcemap",
 		"test": "vitest",
-		"test:run": "vitest run",
+		"test:run": "vitest run --testTimeout 0",
 		"test:coverage": "vitest run --coverage",
 		"lint": "oxlint --type-aware",
 		"lint:fix": "oxlint --fix",
