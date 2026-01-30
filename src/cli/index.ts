@@ -4,6 +4,7 @@ import { Command } from '@commander-js/extra-typings';
 import { Logger } from '@/utils/logger/index.ts';
 import { SUPPORTED_LOG_EXTNAMES } from '@/cli/constants.ts';
 import { lstat } from 'node:fs/promises';
+import yoctoSpinner from 'yocto-spinner';
 
 export const run = () => {
 	const program = new Command();
@@ -18,6 +19,8 @@ export const run = () => {
 		.description(analyzeConfig.description)
 		.arguments(analyzeConfig.arguments)
 		.action(async (from, to) => {
+			const spinner = yoctoSpinner({ text: 'Start analyze...' });
+
 			try {
 				const fromIsDirectory = (await lstat(from)).isFile();
 				const fromIsLogFile = SUPPORTED_LOG_EXTNAMES.includes(extname(from));
@@ -31,9 +34,17 @@ export const run = () => {
 					throw new Error('Failed: to is not a directory');
 				}
 
-				analyze(from, join(to, 'result.json'));
+				await analyze(from, join(to, 'result.json'));
+
+				setTimeout(() =>
+					Logger.success(
+						`Logs have been analyzed, results written by path: ${to}`,
+					),
+				);
 			} catch (err: any) {
-				Logger.error(err.message);
+				setTimeout(() => Logger.error(err.message));
+			} finally {
+				spinner.stop();
 			}
 		});
 
