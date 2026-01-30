@@ -8,27 +8,28 @@ vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
 describe('FileStreamService', () => {
-	let service: FileStreamService;
-	const testDir = '/test';
-	const testFile = `${testDir}/test.txt`;
-	const largeTestFile = `${testDir}/large.txt`;
+	let fs: FileStreamService;
+
+	const TEST_DIR = '/test';
+	const TEST_FILE = `${TEST_DIR}/test.txt`;
+	const LARGE_TEST_FILE = `${TEST_DIR}/large.txt`;
 
 	beforeEach(() => {
-		service = new FileStreamService();
+		fs = new FileStreamService();
 		vol.reset();
-		vol.mkdirSync(testDir, { recursive: true });
+		vol.mkdirSync(TEST_DIR, { recursive: true });
 	});
 
 	describe('readTextFile', () => {
 		test('should initiate file reading without transformation', async () => {
 			const content = faker.lorem.paragraphs(3);
 
-			vol.writeFileSync(testFile, content);
+			vol.writeFileSync(TEST_FILE, content);
 
 			const mockCallback = vi.fn((chunk) => chunk);
 
-			await service.readTextFile({
-				from: testFile,
+			await fs.readTextFile({
+				from: TEST_FILE,
 				transformOptions: {
 					callback: mockCallback,
 				},
@@ -39,12 +40,12 @@ describe('FileStreamService', () => {
 
 		test('should process file with encoding transformation', async () => {
 			const content = faker.lorem.paragraphs(2);
-			vol.writeFileSync(testFile, content);
+			vol.writeFileSync(TEST_FILE, content);
 
 			const mockCallback = vi.fn((chunk) => chunk);
 
-			await service.readTextFile({
-				from: testFile,
+			await fs.readTextFile({
+				from: TEST_FILE,
 				transformOptions: {
 					callback: mockCallback,
 					encoding: 'utf-8',
@@ -63,7 +64,7 @@ describe('FileStreamService', () => {
 
 			const content = lines.join('\n');
 
-			vol.writeFileSync(testFile, content);
+			vol.writeFileSync(TEST_FILE, content);
 
 			const processedLines: string[] = [];
 			const mockCallback = vi.fn((chunk) => {
@@ -71,8 +72,8 @@ describe('FileStreamService', () => {
 				return chunk.toUpperCase();
 			});
 
-			await service.readTextFile({
-				from: testFile,
+			await fs.readTextFile({
+				from: TEST_FILE,
 				transformOptions: {
 					callback: mockCallback,
 					readline: true,
@@ -85,15 +86,15 @@ describe('FileStreamService', () => {
 
 		test('should handle transformation errors with onTransformError callback', async () => {
 			const content = faker.lorem.paragraph();
-			vol.writeFileSync(testFile, content);
+			vol.writeFileSync(TEST_FILE, content);
 
 			const errors: Array<{ chunk: Buffer; err: unknown }> = [];
 			const mockCallback = vi.fn(() => {
 				throw new Error('Test error');
 			});
 
-			await service.readTextFile({
-				from: testFile,
+			await fs.readTextFile({
+				from: TEST_FILE,
 				transformOptions: {
 					callback: mockCallback,
 					onTransformError: (chunk: Buffer, err: unknown) => {
@@ -109,9 +110,9 @@ describe('FileStreamService', () => {
 	describe('writeTextFile', () => {
 		test('should write string source to file', async () => {
 			const content = faker.lorem.paragraphs(5);
-			const outputFile = `${testDir}/output.txt`;
+			const outputFile = `${TEST_DIR}/output.txt`;
 
-			await service.writeTextFile({
+			await fs.writeTextFile({
 				source: content,
 				to: outputFile,
 			});
@@ -123,11 +124,11 @@ describe('FileStreamService', () => {
 
 		test('should write string source with transformation', async () => {
 			const content = faker.lorem.paragraphs(3);
-			const outputFile = `${testDir}/output.txt`;
+			const outputFile = `${TEST_DIR}/output.txt`;
 
 			const mockCallback = vi.fn((chunk) => chunk.toUpperCase());
 
-			await service.writeTextFile({
+			await fs.writeTextFile({
 				source: content,
 				to: outputFile,
 				transformOptions: {
@@ -156,9 +157,9 @@ describe('FileStreamService', () => {
 				},
 			});
 
-			const outputFile = `${testDir}/stream_output.txt`;
+			const outputFile = `${TEST_DIR}/stream_output.txt`;
 
-			await service.writeTextFile({
+			await fs.writeTextFile({
 				options: {
 					bufferChunkSize: 16,
 				},
@@ -193,13 +194,13 @@ describe('FileStreamService', () => {
 			['50MB', FILE_SIZES.LARGE],
 		])('should process %s file efficiently', async (sizeLabel, fileSize) => {
 			const content = generateLargeContent(fileSize);
-			vol.writeFileSync(largeTestFile, content);
+			vol.writeFileSync(LARGE_TEST_FILE, content);
 
 			let processedBytes = 0;
 			const startTime = performance.now();
 
-			await service.readTextFile({
-				from: largeTestFile,
+			await fs.readTextFile({
+				from: LARGE_TEST_FILE,
 				transformOptions: {
 					callback: (chunk) => {
 						processedBytes += chunk.length;
@@ -222,13 +223,13 @@ describe('FileStreamService', () => {
 		test('should process large file line by line efficiently', async () => {
 			const lines = Array.from({ length: 50000 }, () => faker.lorem.sentence());
 			const content = lines.join('\n');
-			vol.writeFileSync(largeTestFile, content);
+			vol.writeFileSync(LARGE_TEST_FILE, content);
 
 			let lineCount = 0;
 			const startTime = performance.now();
 
-			await service.readTextFile({
-				from: largeTestFile,
+			await fs.readTextFile({
+				from: LARGE_TEST_FILE,
 				transformOptions: {
 					callback: () => {
 						lineCount++;
@@ -259,11 +260,11 @@ describe('FileStreamService', () => {
 
 			for (let i = 0; i < filesCount; i++) {
 				const content = generateLargeContent(fileSize);
-				const filePath = `${testDir}/concurrent_${i}.txt`;
+				const filePath = `${TEST_DIR}/concurrent_${i}.txt`;
 				vol.writeFileSync(filePath, content);
 
 				operations.push(
-					service.readTextFile({
+					fs.readTextFile({
 						from: filePath,
 						transformOptions: {
 							callback: (chunk) => chunk,
@@ -292,11 +293,11 @@ describe('FileStreamService', () => {
 
 		test('should write large file with chunked processing efficiently', async () => {
 			const content = generateLargeContent(FILE_SIZES.LARGE);
-			const outputFile = `${testDir}/large_output.txt`;
+			const outputFile = `${TEST_DIR}/large_output.txt`;
 
 			const startTime = performance.now();
 
-			await service.writeTextFile({
+			await fs.writeTextFile({
 				options: {
 					bufferChunkSize: 64,
 				} as any,
