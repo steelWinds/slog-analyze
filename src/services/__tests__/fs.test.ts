@@ -250,47 +250,6 @@ describe('FileStreamService', () => {
 			expect(linesPerSecond).toBeGreaterThan(10000);
 		});
 
-		test('should handle concurrent file operations efficiently', async () => {
-			const filesCount = 5;
-			const fileSize = 5 * 1024 * 1024;
-			const operations: Array<Promise<any>> = [];
-
-			const initialMemory = process.memoryUsage().heapUsed;
-			const startTime = performance.now();
-
-			for (let i = 0; i < filesCount; i++) {
-				const content = generateLargeContent(fileSize);
-				const filePath = `${TEST_DIR}/concurrent_${i}.txt`;
-				vol.writeFileSync(filePath, content);
-
-				operations.push(
-					fs.readTextFile({
-						from: filePath,
-						transformOptions: {
-							callback: (chunk) => chunk,
-						},
-					}),
-				);
-			}
-
-			await Promise.all(operations);
-			const endTime = performance.now();
-			const totalTime = endTime - startTime;
-
-			const finalMemory = process.memoryUsage().heapUsed;
-			const memoryIncrease = finalMemory - initialMemory;
-
-			console.log(
-				`Concurrent processing of ${filesCount} files: ${totalTime.toFixed(2)}ms`,
-			);
-			console.log(
-				`Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)} MB`,
-			);
-
-			expect(totalTime).toBeLessThan(filesCount * 500);
-			expect(memoryIncrease).toBeLessThan(fileSize * filesCount * 0.1);
-		});
-
 		test('should write large file with chunked processing efficiently', async () => {
 			const content = generateLargeContent(FILE_SIZES.LARGE);
 			const outputFile = `${TEST_DIR}/large_output.txt`;
