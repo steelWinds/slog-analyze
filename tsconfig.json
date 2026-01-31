@@ -1,22 +1,24 @@
 {
 	"compilerOptions": {
 		"target": "ES2022",
-		"module": "NodeNext",
+		"module": "nodenext",
 		"types": ["@types/node"],
 		"skipLibCheck": true,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"useDefineForClassFields": true,
 		"strictPropertyInitialization": false,
+		"allowJs": true,
 
 		/* Bundler mode */
-		"moduleResolution": "NodeNext",
+		"moduleResolution": "nodenext",
 		"allowImportingTsExtensions": true,
 		"verbatimModuleSyntax": true,
 		"moduleDetection": "force",
 		"noEmit": true,
 		"paths": {
-			"@/*": ["./src/*"]
+			"src/*": ["./src/*"],
+			"lib/*": ["./lib/*"]
 		},
 
 		/* Linting */
@@ -27,5 +29,5 @@
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true
 	},
-	"include": ["src", "bin", "tsdown-env.d.ts"]
+	"include": ["src", "lib", "bin", "tsdown-env.d.ts"]
 }

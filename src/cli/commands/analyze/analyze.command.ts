@@ -1,6 +1,6 @@
-import { FileStreamService } from '@/services/fs/index.ts';
-import { LogAnalyzer } from '@/core/logAnalyzer/index.ts';
-import { parseCLFLine } from '@/utils/parseCLFLine/index.ts';
+import { FileStreamService } from 'src/services/fs/index.ts';
+import { LogAnalyzer } from 'src/core/logAnalyzer/index.ts';
+import { parseCLFLine } from 'src/utils/parseCLFLine/index.ts';
 
 export const analyze = async (from: string, to: string) => {
 	const fs = new FileStreamService();

@@ -1,9 +1,10 @@
-import { analyze, analyzeConfig } from '@/cli/commands/analyze/index.ts';
+import { analyze, analyzeConfig } from 'src/cli/commands/analyze/index.ts';
 import { extname, join } from 'node:path';
 import { Command } from '@commander-js/extra-typings';
-import { Logger } from '@/utils/logger/index.ts';
-import { SUPPORTED_LOG_EXTNAMES } from '@/cli/constants.ts';
+import { Logger } from 'src/utils/logger/index.ts';
+import { SUPPORTED_LOG_EXTNAMES } from 'src/cli/constants.ts';
 import { lstat } from 'node:fs/promises';
+import { version } from 'lib/version.js';
 import yoctoSpinner from 'yocto-spinner';
 
 export const run = () => {
@@ -12,7 +13,7 @@ export const run = () => {
 	program
 		.name(import.meta.env.TSDOWN_APP_NAME)
 		.description(import.meta.env.TSDOWN_APP_DESCRIPTION)
-		.version(import.meta.env.TSDOWN_APP_VERSION);
+		.version(version);
 
 	program
 		.command(analyzeConfig.name)

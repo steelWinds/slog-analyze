@@ -2,9 +2,9 @@ import {
 	FIELDS,
 	FORMATS,
 	START_WITHOUT_INSTANCE_STRING,
-} from '@/utils/parseCLFLine/constants.ts';
-import type { FormatCLF, ParsedCLF } from '@/utils/parseCLFLine/types.ts';
-import { DEFAULT_FORMATS } from '@/utils/parseCLFLine/config.ts';
+} from 'src/utils/parseCLFLine/constants.ts';
+import type { FormatCLF, ParsedCLF } from 'src/utils/parseCLFLine/types.ts';
+import { DEFAULT_FORMATS } from 'src/utils/parseCLFLine/config.ts';
 
 export const parseCLFLine = (
 	line: string,

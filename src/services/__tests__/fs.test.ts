@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { FileStreamService } from '@/services/fs/index.ts';
+import { FileStreamService } from 'src/services/fs/index.ts';
 import { faker } from '@faker-js/faker';
 import { performance } from 'perf_hooks';
 import { vol } from 'memfs';

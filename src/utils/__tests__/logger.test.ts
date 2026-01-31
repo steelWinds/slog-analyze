@@ -1,4 +1,4 @@
-import { Logger, log } from '@/utils/logger/index.ts';
+import { Logger, log } from 'src/utils/logger/index.ts';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import chalk from 'chalk';
 import { consola } from 'consola';

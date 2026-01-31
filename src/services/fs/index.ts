@@ -2,11 +2,11 @@ import type {
 	ReadFileParams,
 	TransformStreamParams,
 	WriteFileParams,
-} from '@/services/fs/types.ts';
+} from 'src/services/fs/types.ts';
 import { ReadStream, createReadStream, createWriteStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import { createInterface } from 'node:readline';
-import { log } from '@/utils/logger/index.ts';
+import { log } from 'src/utils/logger/index.ts';
 import { pipeline } from 'node:stream/promises';
 
 export class FileStreamService {

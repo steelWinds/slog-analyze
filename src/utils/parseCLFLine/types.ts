@@ -1,4 +1,4 @@
-import { FORMATS } from '@/utils/parseCLFLine/constants.ts';
+import { FORMATS } from 'src/utils/parseCLFLine/constants.ts';
 
 export type FormatCLF = keyof typeof FORMATS;
 

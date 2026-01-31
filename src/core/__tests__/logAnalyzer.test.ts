@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { LogAnalyzer } from '@/core/logAnalyzer/index.ts';
-import type { LogEntry } from '@/core/logAnalyzer/types.ts';
+import { LogAnalyzer } from 'src/core/logAnalyzer/index.ts';
+import type { LogEntry } from 'src/core/logAnalyzer/types.ts';
 import { faker } from '@faker-js/faker';
 
 describe('LogAnalyzer', () => {

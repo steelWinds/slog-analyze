@@ -35,8 +35,8 @@
 	"type": "module",
 	"main": "./build/slog-analyze.mjs",
 	"scripts": {
-		"build": "tsdown --env-file .env.production --minify --log-level error",
-		"build:dev": "tsdown --env-file .env.development --sourcemap",
+		"build": "genversion lib/version.js --esm --strict && tsdown --env-file .env.production --minify --log-level error",
+		"build:dev": "genversion lib/version.js --esm --strict && tsdown --env-file .env.development --sourcemap",
 		"test": "vitest",
 		"test:run": "vitest run --testTimeout 0",
 		"test:coverage": "vitest run --coverage",
@@ -59,6 +59,7 @@
 		"@faker-js/faker": "^10.2.0",
 		"@types/node": "^25.0.9",
 		"@vitest/coverage-v8": "^4.0.17",
+		"genversion": "^3.2.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.7",
 		"memfs": "^4.56.9",

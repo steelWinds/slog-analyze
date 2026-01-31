@@ -1,21 +1,21 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { FileStreamService } from '@/services/fs/index.ts';
-import { LogAnalyzer } from '@/core/logAnalyzer/index.ts';
-import { analyze } from '@/cli/commands/analyze/index.ts';
+import { FileStreamService } from 'src/services/fs/index.ts';
+import { LogAnalyzer } from 'src/core/logAnalyzer/index.ts';
+import { analyze } from 'src/cli/commands/analyze/index.ts';
 import { faker } from '@faker-js/faker';
-import { parseCLFLine } from '@/utils/parseCLFLine/index.ts';
+import { parseCLFLine } from 'src/utils/parseCLFLine/index.ts';
 import { vol } from 'memfs';
 
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
-vi.mock(import('@/utils/logger/index.ts'), { spy: true });
+vi.mock(import('src/utils/logger/index.ts'), { spy: true });
 
-vi.mock(import('@/services/fs/index.ts'), { spy: true });
+vi.mock(import('src/services/fs/index.ts'), { spy: true });
 
-vi.mock(import('@/core/logAnalyzer/index.ts'), { spy: true });
+vi.mock(import('src/core/logAnalyzer/index.ts'), { spy: true });
 
-vi.mock(import('@/utils/parseCLFLine/index.ts'), { spy: true });
+vi.mock(import('src/utils/parseCLFLine/index.ts'), { spy: true });
 
 vi.mock(import('yocto-spinner'), { spy: true });
 

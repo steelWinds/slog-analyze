@@ -2,12 +2,12 @@ import {
 	FIELDS,
 	FORMATS,
 	START_WITHOUT_INSTANCE_STRING,
-} from '@/utils/parseCLFLine/constants.ts';
+} from 'src/utils/parseCLFLine/constants.ts';
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_FORMATS } from '@/utils/parseCLFLine/config.ts';
-import type { ParsedCLF } from '@/utils/parseCLFLine/types.ts';
+import { DEFAULT_FORMATS } from 'src/utils/parseCLFLine/config.ts';
+import type { ParsedCLF } from 'src/utils/parseCLFLine/types.ts';
 import { faker } from '@faker-js/faker';
-import { parseCLFLine } from '@/utils/parseCLFLine/index.ts';
+import { parseCLFLine } from 'src/utils/parseCLFLine/index.ts';
 
 describe('parseCLFLine constants', () => {
 	it('should have correct FORMATS', () => {
