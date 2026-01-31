@@ -1,9 +1,9 @@
 import { analyze, analyzeConfig } from 'src/cli/commands/analyze/index.ts';
 import { extname, join } from 'node:path';
+import { lstat, mkdir } from 'node:fs/promises';
 import { Command } from '@commander-js/extra-typings';
 import { Logger } from 'src/utils/logger/index.ts';
 import { SUPPORTED_LOG_EXTNAMES } from 'src/cli/constants.ts';
-import { lstat } from 'node:fs/promises';
 import { version } from 'lib/version.js';
 import yoctoSpinner from 'yocto-spinner';
 
@@ -25,14 +25,13 @@ export const run = () => {
 			try {
 				const fromIsDirectory = (await lstat(from)).isFile();
 				const fromIsLogFile = SUPPORTED_LOG_EXTNAMES.includes(extname(from));
-				const toIsDirectory = (await lstat(to)).isDirectory();
+
+				await mkdir(to, { recursive: true });
 
 				if (!fromIsDirectory) {
 					throw new Error('Failed: from path is not a file');
 				} else if (!fromIsLogFile) {
 					throw new Error('Failed: from path is not a log file');
-				} else if (!toIsDirectory) {
-					throw new Error('Failed: to path is not a directory');
 				}
 
 				await analyze(from, join(to, 'result.json'));
