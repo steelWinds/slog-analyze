@@ -1,13 +1,18 @@
 {
 	"name": "slog-analyze",
 	"version": "0.0.1",
-	"private": true,
+	"private": false,
 	"description": "Miniature log analyzer, just for fun",
 	"keywords": [
 		"analyzer",
 		"cli",
 		"log"
 	],
+	"homepage": "https://github.com/steelWinds/slog-analyze",
+	"bugs": {
+		"url": "https://github.com/steelWinds/slog-analyze/issues",
+		"email": "kirillsurov0@gmail.com"
+	},
 	"license": "MPL-2.0",
 	"author": "steelWinds",
 	"repository": {
