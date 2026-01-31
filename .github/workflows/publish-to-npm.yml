@@ -1,0 +1,95 @@
+name: Publish to npm
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run linter
+        run: pnpm run lint
+
+      - name: Run formatter check
+        run: pnpm run fmt:check
+
+      - name: Run tests
+        run: pnpm run test:run
+
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+
+      - name: Build project
+        run: pnpm run build
+
+  publish:
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Check version
+        id: check-version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if npm view ${{ github.event.repository.name }}@${{ steps.check-version.outputs.current_version }} version > /dev/null 2>&1; then
+            echo "Version ${{ steps.check-version.outputs.current_version }} already published, skipping"
+          else
+            echo "Publishing version ${{ steps.check-version.outputs.current_version }}"
+            npm publish --access public
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          tag_name: v${{ steps.check-version.outputs.current_version }}
+          name: Release v${{ steps.check-version.outputs.current_version }}
+          generate_release_notes: true
