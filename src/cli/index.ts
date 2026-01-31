@@ -27,11 +27,11 @@ export const run = () => {
 				const toIsDirectory = (await lstat(to)).isDirectory();
 
 				if (!fromIsDirectory) {
-					throw new Error("Failed: from path is'nt a file");
+					throw new Error('Failed: from path is not a file');
 				} else if (!fromIsLogFile) {
-					throw new Error("Failed: from is'nt a log file");
+					throw new Error('Failed: from path is not a log file');
 				} else if (!toIsDirectory) {
-					throw new Error('Failed: to is not a directory');
+					throw new Error('Failed: to path is not a directory');
 				}
 
 				await analyze(from, join(to, 'result.json'));
