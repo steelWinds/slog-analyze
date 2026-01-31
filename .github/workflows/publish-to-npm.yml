@@ -1,18 +1,16 @@
 name: Publish to npm
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
-  test-and-lint:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Create env file
         run: |
@@ -47,14 +45,10 @@ jobs:
         run: pnpm run build
 
   publish:
-    needs: test-and-lint
+    needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
 
       - name: Create env file
         run: |
@@ -64,16 +58,11 @@ jobs:
           echo TSDOWN_MODE=${{ env.TSDOWN_MODE }} >> .env.production
           cat .env.production
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org/'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+          version: 10
+          cache: true
 
       - name: Install dependencies
         run: pnpm install
