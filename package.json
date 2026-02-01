@@ -1,7 +1,7 @@
 {
 	"name": "slog-analyze",
 	"version": "0.0.3",
-	"private": true,
+	"private": false,
 	"description": "Miniature log analyzer, just for fun",
 	"keywords": [
 		"analyzer",
