@@ -1,0 +1,54 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'friday'
+      time: '09:00'
+      timezone: 'Europe/Moscow'
+    open-pull-requests-limit: 10
+    versioning-strategy: 'auto'
+    commit-message:
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'
+
+    groups:
+      production-dependencies:
+        dependency-type: 'production'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+      development-dependencies:
+        dependency-type: 'development'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+    ignore:
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
+
+      - dependency-name: 'commander'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@commander-js/extra-typings'
+        update-types: ['version-update:semver-major']
+
+    labels:
+      - 'dependencies'
+      - 'automerge'
+    reviewers:
+      - 'steelWinds'
+
+    rebase-strategy: 'auto'
+
+    pull-request-branch-name:
+      separator: '-'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    open-pull-requests-limit: 5
