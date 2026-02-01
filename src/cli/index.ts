@@ -20,7 +20,7 @@ export const run = () => {
 		.description(analyzeConfig.description)
 		.arguments(analyzeConfig.arguments)
 		.action(async (from, to) => {
-			const spinner = yoctoSpinner({ text: 'Start analyze...' });
+			const spinner = yoctoSpinner({ text: 'Start analyze...' }).start();
 
 			try {
 				const fromIsDirectory = (await lstat(from)).isFile();
