@@ -15,7 +15,7 @@ export const analyze = async (from: string, to: string) => {
 				const parseChunk = parseCLFLine(str);
 
 				if (!parseChunk) {
-					throw new Error(`Failed parse chunk: ${chunk}`);
+					throw new Error(`Parse chunk: ${chunk}`);
 				}
 
 				logAnalyzer.combine(parseChunk);

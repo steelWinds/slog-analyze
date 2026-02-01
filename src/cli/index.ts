@@ -29,9 +29,11 @@ export const run = () => {
 				await mkdir(to, { recursive: true });
 
 				if (!fromIsDirectory) {
-					throw new Error('Failed: from path is not a file');
+					throw new Error('The path is not a file');
 				} else if (!fromIsLogFile) {
-					throw new Error('Failed: from path is not a log file');
+					throw new Error(
+						'The path is not a log file, allowed extensions are .log and .txt.',
+					);
 				}
 
 				await analyze(from, join(to, 'result.json'));

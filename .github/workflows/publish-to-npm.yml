@@ -17,7 +17,7 @@ jobs:
           touch .env.production
           echo TSDOWN_APP_NAME=${{ env.TSDOWN_APP_NAME }} >> .env.production
           echo TSDOWN_APP_DESCRIPTION=${{ env.TSDOWN_APP_DESCRIPTION }} >> .env.production
-          echo TSDOWN_MODE=${{ env.TSDOWN_MODE }} >> .env.production
+          echo TSDOWN_MODE=production >> .env.production
           cat .env.production
 
       - name: Install pnpm
@@ -63,7 +63,7 @@ jobs:
           touch .env.production
           echo TSDOWN_APP_NAME=${{ env.TSDOWN_APP_NAME }} >> .env.production
           echo TSDOWN_APP_DESCRIPTION=${{ env.TSDOWN_APP_DESCRIPTION }} >> .env.production
-          echo TSDOWN_MODE=${{ env.TSDOWN_MODE }} >> .env.production
+          echo TSDOWN_MODE=production >> .env.production
           cat .env.production
 
       - name: Install pnpm
@@ -94,11 +94,7 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if npm view ${{ github.event.repository.name }}@${{ steps.check-version.outputs.current_version }} version > /dev/null 2>&1; then
-            echo "Version ${{ steps.check-version.outputs.current_version }} already published, skipping"
-          else
-            echo "Publishing version ${{ steps.check-version.outputs.current_version }}"
-            npm publish --provenance --access public
-          fi
+          echo "Publishing version ${{ steps.check-version.outputs.current_version }}"
+          npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
