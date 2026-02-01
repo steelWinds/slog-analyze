@@ -2,6 +2,10 @@
 
 Miniature analyzer for CLF-standart logs, just for fun :з
 
+![GitHub License](https://img.shields.io/github/license/steelWinds/slog-analyze)
+![NPM Unpacked Size](https://img.shields.io/npm/unpacked-size/slog-analyze)
+![NPM Version](https://img.shields.io/npm/v/:packageName)
+
 ## Quick Start
 
 ### Prerequisites
