@@ -21,7 +21,7 @@ export class FileStreamService {
 
 		return async function* (source: ReadStream) {
 			if (encoding) {
-				source.setEncoding('utf-8');
+				source.setEncoding(encoding);
 			}
 
 			let _source = readline
