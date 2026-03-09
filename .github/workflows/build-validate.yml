@@ -16,6 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Create env file
+        run: |
+          touch .env.production
+          echo TSDOWN_APP_NAME=${{ env.TSDOWN_APP_NAME }} >> .env.production
+          echo TSDOWN_APP_DESCRIPTION=${{ env.TSDOWN_APP_DESCRIPTION }} >> .env.production
+          echo TSDOWN_MODE=production >> .env.production
+          cat .env.production
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
