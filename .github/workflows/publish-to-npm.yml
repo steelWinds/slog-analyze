@@ -6,57 +6,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Create env file
-        run: |
-          touch .env.production
-          echo TSDOWN_APP_NAME=${{ env.TSDOWN_APP_NAME }} >> .env.production
-          echo TSDOWN_APP_DESCRIPTION=${{ env.TSDOWN_APP_DESCRIPTION }} >> .env.production
-          echo TSDOWN_MODE=production >> .env.production
-          cat .env.production
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Install Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 'latest'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run linter
-        run: pnpm run lint
-
-      - name: Run formatter check
-        run: pnpm run fmt:check
-
-      - name: Run tests
-        run: pnpm run test:run
-
-      - name: Run tests with coverage
-        run: pnpm run test:coverage
-
-      - name: Build project
-        run: pnpm run build
-
   publish:
-    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Create env file
         run: |
@@ -80,10 +37,22 @@ jobs:
           scope: '@steelwindshellahillz'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Oxlint
+        run: pnpm lint:fix
+
+      - name: Run Oxfmt
+        run: pnpm fmt:check
+
+      - name: Run Tests
+        run: pnpm test:run
+
+      - name: Run Tests with coverage
+        run: pnpm test:coverage
 
       - name: Build project
-        run: pnpm run build
+        run: pnpm build
 
       - name: Check version
         id: check-version

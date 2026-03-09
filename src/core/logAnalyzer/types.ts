@@ -12,7 +12,7 @@ export interface LogEntry {
 
 export interface LogAnalyzerState {
 	totalRequests: number;
-	uniqueRemoteHosts: Set<string>;
+	uniqueRemoteHosts: any;
 	requests: Record<string, number>;
 	trafficByHour: Record<string, number>;
 	statusCodes: Record<string | number, number>;

@@ -1,0 +1,46 @@
+import { FIELDS, FORMATS, START_WITHOUT_INSTANCE_STRING } from './constants.ts';
+import type { FormatCLF, ParsedCLF } from './types.ts';
+import { DEFAULT_FORMATS } from './config.ts';
+
+export const parseCLFLine = (
+	line: string,
+	formats?: Partial<typeof DEFAULT_FORMATS>,
+): ParsedCLF | null => {
+	let matchesExec: RegExpExecArray | null = null;
+	let formatName: FormatCLF | null = null;
+
+	for (const [key, regexp] of Object.entries(FORMATS) as [
+		FormatCLF,
+		RegExp,
+	][]) {
+		matchesExec = regexp.exec(line);
+
+		if (matchesExec) {
+			formatName = key;
+
+			break;
+		}
+	}
+
+	if (!matchesExec || !formatName) {
+		return null;
+	}
+
+	const _formats = {
+		...DEFAULT_FORMATS,
+		...(formats ?? {}),
+	};
+
+	const formatted = Object.fromEntries(
+		matchesExec.slice(START_WITHOUT_INSTANCE_STRING).map((value, idx) => {
+			const field = FIELDS[formatName][idx];
+
+			const _value =
+				_formats[field] instanceof Function ? _formats[field](value) : value;
+
+			return [field, _value];
+		}),
+	) as any as ParsedCLF;
+
+	return formatted;
+};

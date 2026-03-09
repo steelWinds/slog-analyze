@@ -1,0 +1,20 @@
+{
+	"topRequests": [
+		["POST /login HTTP/1.1", 2],
+		["GET /images/logo.png HTTP/1.1", 2],
+		["POST / HTTP/1.1", 2],
+		["GET /index.html HTTP/1.1", 1],
+		["POST /index.html HTTP/1.1", 1],
+		["GET /login HTTP/1.1", 1],
+		["POST /api/data HTTP/1.1", 1]
+	],
+	"topStatusCodes": [
+		["302", 4],
+		["201", 3],
+		["500", 2],
+		["200", 1]
+	],
+	"topTrafficHours": [["12", 10]],
+	"totalRequests": 10,
+	"uniqueRemoteHostsCount": 5
+}

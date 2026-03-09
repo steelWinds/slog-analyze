@@ -5,7 +5,7 @@ import { consola } from 'consola';
 import { faker } from '@faker-js/faker';
 
 vi.mock('consola', () => {
-	const consola = {
+	const _consola = {
 		error: vi.fn(),
 		info: vi.fn(),
 		prompt: vi.fn(),
@@ -14,11 +14,11 @@ vi.mock('consola', () => {
 		warn: vi.fn(),
 	};
 
-	return { consola: consola };
+	return { consola: _consola };
 });
 
 vi.mock('chalk', () => {
-	const chalk = {
+	const _chalk = {
 		cyan: vi.fn((msg) => `cyan:${msg}`),
 		green: vi.fn((msg) => `green:${msg}`),
 		magenta: vi.fn((msg) => `magenta:${msg}`),
@@ -26,7 +26,7 @@ vi.mock('chalk', () => {
 		yellow: vi.fn((msg) => `yellow:${msg}`),
 	};
 
-	return { default: chalk };
+	return { default: _chalk };
 });
 
 describe('Logger', () => {
