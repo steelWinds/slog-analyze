@@ -67,12 +67,12 @@
 		"oxfmt": "^0.27.0",
 		"oxlint": "^1.42.0",
 		"oxlint-tsgolint": "^0.16.0",
-		"tsdown": "0.20.1",
+		"tsdown": "0.20.3",
 		"typescript": "~5.9.3",
 		"vitest": "^4.0.17"
 	},
 	"overrides": {
-		"tsdown": "0.20.1"
+		"tsdown": "0.20.3"
 	},
 	"lint-staged": {
 		"*": "oxfmt --no-error-on-unmatched-pattern",
