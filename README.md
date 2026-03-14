@@ -2,11 +2,14 @@
 
 Miniature analyzer for CLF-standart logs, just for fun :з
 
-_Allowed files are .log and .txt._
+> _Allowed files are .log and .txt._
+
+> Made with love. ❤️
 
 ![GitHub License](https://img.shields.io/github/license/steelWinds/slog-analyze)
 ![NPM Unpacked Size](https://img.shields.io/npm/unpacked-size/slog-analyze)
 ![NPM Version](https://img.shields.io/npm/v/slog-analyze)
+[![build-validate](https://github.com/steelWinds/slog-analyze/actions/workflows/build-validate.yml/badge.svg)](https://github.com/steelWinds/slog-analyze/actions/workflows/build-validate.yml)
 
 ## Quick Start
 

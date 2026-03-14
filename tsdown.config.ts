@@ -5,6 +5,7 @@ export default defineConfig({
 	alias: {
 		'@': fileURLToPath(new URL('./src', import.meta.url)),
 	},
+	dts: true,
 	entry: 'bin/slog-analyze.ts',
 	external: [
 		'fs',
