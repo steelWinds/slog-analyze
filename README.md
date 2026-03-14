@@ -11,6 +11,11 @@ Miniature analyzer for CLF-standart logs, just for fun :з
 ![NPM Version](https://img.shields.io/npm/v/slog-analyze)
 [![build-validate](https://github.com/steelWinds/slog-analyze/actions/workflows/build-validate.yml/badge.svg)](https://github.com/steelWinds/slog-analyze/actions/workflows/build-validate.yml)
 
+<div align="center">
+  <img width="300" src="./.github/logo.png" alt="slog-analyze logo">
+  <h3 align="center">slog-analyze</h3>
+</div>
+
 ## Quick Start
 
 ### Prerequisites
